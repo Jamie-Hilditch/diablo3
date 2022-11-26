@@ -1,0 +1,47 @@
+# input_chan.toml 
+# inputs for diablo channel in geometry. Note that the grid sizes are defined in grid_def.all 
+# so that they are known at compile time
+VERSION = "3.4"
+[SCHEME]
+TIME_AD_METH = 1
+LES_MODEL_TYPE = 5
+[INITIAL_CONDITIONS]
+IC_TYPE = 7
+KICK = 1.0e-5
+PHYSICAL_NOISE = true
+[PHYSICAL]
+RO = 1.0 # Rossby number (1/f)
+DELTA = 300.0 # aspect ratio
+GRAV = [0.0, 0.0, 1.0] # vertical (anti-gravity) unit vector
+[FORCING]
+F_TYPE = 3
+UBULK0 = 0.0
+PX0 = 0.0
+OMEGA0 = 0.0
+AMP_OMEGA0 = 0.0
+FORCE_START = 0.0
+[VELOCITY_BCS] # 0 = Dirichlet, 1 = Neumann
+U_BC_ZMIN = 0
+U_BC_ZMIN_C1 = 0.0
+V_BC_ZMIN = 0
+V_BC_ZMIN_C1 = 0.0
+W_BC_ZMIN = 0
+W_BC_ZMIN_C1 = 0.0
+U_BC_ZMAX = 1
+U_BC_ZMAX_C1 = 0.0
+V_BC_ZMAX = 1
+V_BC_ZMAX_C1 = 0.0
+W_BC_ZMAX = 0
+W_BC_ZMAX_C1 = 0.0
+# Scalar boundary conditions - double brackets creates an array of tables
+# repeat (with same name [[SCALAR_BCS]]) for each scalar
+[[SCALAR_BCS]] # 0 = Dirichlet, 1 = Neumann
+TH_BC_ZMIN = 1
+TH_BC_ZMIN_C1 = 0.0
+TH_BC_ZMAX = 1
+TH_BC_ZMAX_C1 = 0.0
+# [[SCALAR_BCS]] # 0 = Dirichlet, 1 = Neumann
+# TH_BC_ZMIN = 1
+# TH_BC_ZMIN_C1 = 0.0
+# TH_BC_ZMAX = 1
+# TH_BC_ZMAX_C1 = 0.0
