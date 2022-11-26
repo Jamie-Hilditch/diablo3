@@ -1,6 +1,6 @@
 
 # Fortran 90 complier to use:
-COMPILER = ifort
+COMPILER = gfortran
 
 # Target Architecture (Otherwise use -xHost)
 # 	Skylake:	-xCORE-AVX512

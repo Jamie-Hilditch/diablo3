@@ -5,7 +5,7 @@ NPz=$1
 NPy=$2
 
 rundir=`pwd`
-codedir=/home/aw670/diablo3/for
+codedir=$GROUP_HOME/hilditch/scripts/diablo3/for
 
 
 # Copy grid files from run dir
