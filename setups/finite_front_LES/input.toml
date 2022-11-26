@@ -1,0 +1,46 @@
+# input.toml
+# inputs for diablo. Note that the grid sizes are defined in grid_def.all 
+# so that they are known at compile time
+VERSION = "3.4"
+[SCHEME]
+FLAVOUR = "Front"
+TIME_AD_METH = 1
+NUM_PER_DIR = 2 # (only channel geometry implemented)
+USE_MPI = true  # set in makefile (serial execution depreciated)
+USE_LES = true # set in makefile
+[PHYSICAL]
+LX = 1600.0
+LY = 100.0
+LZ = 1.0
+RE = 2.0e6
+BETA = 1.0 # Horizontal viscosity laplacian exponent
+NU_V_SCALE = 1.0 # Vertical viscosity scale factor   NU_V=1/RE*NU_V_SCALE
+[TIMESTEPPING]
+CREATE_NEW_FLOW = true
+RESET_TIME = false
+WALL_TIME = 40_000 # (s)
+TIME_LIMIT = 15_000
+DELTA_T = 1.0e-5
+VARIABLE_DT = true
+CFL = 0.5 
+UPDATE_DT = 1
+[OUTPUT]
+VERBOSITY = 2
+SAVE_FLOW_DT = 15_000
+SAVE_STATS_DT = 2.5
+SAVE_MOVIE_DT = 20.0
+MOVIE = [800.0, 0.0, 0.95] # X,Y,Z
+# Scalar parameters - double brackets creates an array of tables
+# repeat (with same name [[SCALARS]]) for each scalar
+[[SCALARS]]
+CREATE_FLOW_TH = true 
+FILTER_TH = false 
+FILTER_INT = 10
+RI = 0.0 
+PR = 1.0
+# [[SCALARS]]
+# CREATE_FLOW_TH = true 
+# FILTER_TH = false 
+# FILTER_INT = 10
+# RI = 0.0 
+# PR = 1.0
