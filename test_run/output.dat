@@ -1,0 +1,29 @@
+MPI Initialised with          4 processors
+Using Only Distributed Memory MPI
+
+              ****** WELCOME TO DIABLO ******
+
+Ro Inverse =   1.000000000000000000E+00
+Fourier in X
+Fourier in Y
+Finite-difference in Z
+
+Movie Parameters
+              ****** In Init_Chan_MPI ******
+
+Use LES: T
+Flavor:  Front                              
+Nx    =        2048
+Rank =          1
+Ny    =         128
+  Xc =   8.000000000000000000E+02
+Nz(p) =          33
+Scalar Number:  1
+  Richardson number =  0.00000E+00
+  Prandtl number    =  1.00000E+00
+  Yc =   0.000000000000000000E+00
+Nu   =  5.00000E-07
+  Zc =   9.457669904403722683E-01
+Beta =  1.00000E+00
+Nkx   =        682
+2Nkz  =         84

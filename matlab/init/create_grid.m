@@ -19,7 +19,7 @@
 
 % Set the dimensions of the grid 
 % This should match (NX,NY,NZ) in grid_def
- N = input('Enter the grid size, NZ (this should match NZ in grid_def.all): ');
+ N = 65 %input('Enter the grid size, NZ (this should match NZ in grid_def.all): ');
 
 % Enter the domain size unless we are reading the grid
  Lz = 1 %input('Enter the domain size: ');

@@ -8,19 +8,20 @@ COMPILER = gfortran
 TARGET_ARCH = #-xMIC-AVX512
 
 # Libraries to Link
-LDFLAGS =
+LDFLAGS = -L /share/software/user/open/fftw/3.3.10/lib
 
 # Include Directories
-INCLUDES =
+INCLUDES = -I /share/software/user/open/fftw/3.3.10/include
 
 # Compiler Options
-FCFLAGS = -O3 -ipo -xHost   # HPC
+#FCFLAGS = -O3 -ipo -xHost   # HPC
+FCFLAGS = -O3
 #FCFLAGS = -O0 -g -check all -traceback -debug extended # Debug
 
 
 # --- # --- # --- # --- # --- # --- # --- # --- #
 
-LDFLAGS += -lfftw3 -mkl -lgfortran
+LDFLAGS += -lfftw3 -lgfortran
 
 FCFLAGS += $(TARGET_ARCH) -DHDF5
 FCFLAGS += $(INCLUDES)
