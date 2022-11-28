@@ -23,7 +23,7 @@ FCFLAGS = -O3
 
 LDFLAGS += -lfftw3 -lgfortran
 
-FCFLAGS += $(TARGET_ARCH) -DHDF5
+# FCFLAGS += $(TARGET_ARCH) -DHDF5
 FCFLAGS += $(INCLUDES)
 ifeq ($(COMPILER),ifort)
   FCFLAGS += -fpp
