@@ -1,8 +1,33 @@
 # !/bin/bash
 
 # Input: Number of Processors
-NPz=$1
-NPy=$2
+if [[ $1 =~ [^0-9]+ ]] then
+  NPz=$1
+else
+  echo "First argument NPz must be a positive integer"
+  exit 1
+fi 
+
+if [[ $2 =~ [^0-9]+ ]] then
+  NPy=$2
+else
+  echo "Second argument NPy must be a positive integer"
+  exit 1
+fi 
+
+if [[ $3 -eq "--debug"] -o [ $4 -eq "--debug"]]
+  DEBUG=TRUE
+else
+  DEBUG=FALSE
+fi
+
+if [[ $3 -eq "--shared"] -o [ $4 -eq "--shared"]]
+  SHARED_MEMORY=TRUE
+else
+  SHARED_MEMORY=FALSE
+fi
+
+################################################################
 
 rundir=`pwd`
 codedir=$GROUP_HOME/hilditch/scripts/diablo3/for
@@ -27,12 +52,11 @@ fi
 
 # Compile the code (in build)
 make clean
-make -j4
+make DEBUG=$(DEBUG) SHARED_MEMORY=$(SHARED_MEMORY)
 
 # Copy the executable back to the run dir
 cp diablo $rundir
 cd $rundir
 rm -r $rundir/build
 
-# Run diablo
-#mpirun -np $((NPz*NPy)) diablo > output.dat &
+exit 0
