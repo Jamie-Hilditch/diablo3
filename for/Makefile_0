@@ -1,3 +1,8 @@
+# Flags (pass as commandline variables e.g. make DEBUG=TRUE)
+DEBUG ?= FALSE
+SHARED_MEMORY ?= FALSE
+
+#############################################################################
 # Fortran 90 complier to use: gfortran or ifort
 COMPILER = gfortran
 
@@ -7,30 +12,30 @@ FFTW_LIB = /share/software/user/open/fftw/3.3.10/lib
 # FFTW include directory
 FFTW_INCLUDE = /share/software/user/open/fftw/3.3.10/include
 
-# Shared memory
-SHARED_MEMORY = TRUE
-
-# Compiler Options
-#FCFLAGS = -O3
-FCFLAGS = -O0 -g -fcheck=all -fbacktrace # Debug
-
-
 #############################################################################
 
 LDFLAGS += -L$(FFTW_LIB) -lfftw3 -lgfortran
 
-# Preprocessing, link time and architecture optimisation (compiler dependent)
-ifeq ($(COMPILER),ifort)
-  FCFLAGS += -fpp -ipo -xHost
-else ifeq ($(COMPILER),gfortran)
-  FCFLAGS += -cpp -march=native -flto
+# Optimise or debug(compiler dependent)
+ifeq ($(DEBUG),FALSE)
+  ifeq ($(COMPILER),ifort)
+    FCFLAGS += -O3 -fpp -ipo -xHost
+  else ifeq ($(COMPILER),gfortran)
+    FCFLAGS += -O3 -cpp -march=native -flto
+  endif
+else
+  ifeq ($(COMPILER),ifort)
+    FCFLAGS += -O0 -g check all traceback 
+  else ifeq ($(COMPILER),gfortran)
+    FCFLAGS += -O0 -g -fcheck=all -fbacktrace
+  endif
 endif
-
+  
 # Include FFTW
 FCFLAGS += -I$(FFTW_INCLUDE)
 
 # Shared memory
-ifeq ($(SHARED_MEMORY),TRUE)
+ifneq ($(SHARED_MEMORY),FALSE)
   FCFLAGS += -DSHARED_MEMORY
 endif
 
