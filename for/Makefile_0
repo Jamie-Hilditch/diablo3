@@ -11,8 +11,8 @@ FFTW_INCLUDE = /share/software/user/open/fftw/3.3.10/include
 SHARED_MEMORY = TRUE
 
 # Compiler Options
-FCFLAGS = -O3
-#FCFLAGS = -O0 -g -check all -traceback -debug extended # Debug
+#FCFLAGS = -O3
+FCFLAGS = -O0 -g -fcheck=all -fbacktrace # Debug
 
 
 #############################################################################
