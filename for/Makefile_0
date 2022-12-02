@@ -14,8 +14,7 @@ LDFLAGS = -L/share/software/user/open/fftw/3.3.10/lib
 INCLUDES = -I/share/software/user/open/fftw/3.3.10/include
 
 # Compiler Options
-#FCFLAGS = -O3 -ipo -xHost   # HPC
-FCFLAGS = -O3
+FCFLAGS = -O3 -DSHARED_MEMORY
 #FCFLAGS = -O0 -g -check all -traceback -debug extended # Debug
 
 
@@ -26,9 +25,9 @@ LDFLAGS += -lfftw3 -lgfortran
 # FCFLAGS += $(TARGET_ARCH) -DHDF5
 FCFLAGS += $(INCLUDES)
 ifeq ($(COMPILER),ifort)
-  FCFLAGS += -fpp
+  FCFLAGS += -fpp -ipo -xHost
 else ifeq ($(COMPILER),gfortran)
-  FCFLAGS += -cpp
+  FCFLAGS += -cpp -march=native -flto
 endif
 
 COMPILER = h5pfc
