@@ -8,6 +8,9 @@ module flow
 
   ! Flow !
 
+  ! RK
+  real(rkind)  h_bar(3), beta_bar(3), zeta_bar(3)
+
   ! 3D
   real(rkind), pointer, contiguous, dimension(:,:,:) :: u1,u2,u3,p,r1,r2,r3,f1,f2,f3,s1
   complex(rkind), pointer, contiguous, dimension(:,:,:) :: cu1,cu2,cu3,cp,cr1,cr2,cr3, &
@@ -101,12 +104,22 @@ contains
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
 
     integer j, n
+    ! logical start_file_exists
 
     call allocate_all
     if (use_LES) call allocate_all_les
 
     ! Initialize FFT package (includes defining the wavenumber vectors).
     call init_fft(u1,cu1)
+
+    
+    ! inquire (file="start.h5", exist=start_file_exists)
+    ! if (start_file_exists) then
+    !   create_new_flow = .false.
+    !   do n = 1, N_th
+    !     create_new_th(n) = .false.
+    !   end do
+    ! end if
 
     ! Initialize values for reading of scalars
     num_read_th = 0
@@ -160,6 +173,8 @@ contains
     previous_time_step = time_step
     call wall_time(previous_wall_time)
 
+    call init_RKW3
+
     if (rank == 0) then
       write (*, *)
       write (*, *) '             ****** Done Initialising ******'
@@ -169,8 +184,22 @@ contains
     return
   end
 
+  !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+  subroutine init_RKW3
+    !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
 
-
+    ! Initialize RKW3 parameters.
+    h_bar(1) = delta_t * (8.d0 / 15.d0)
+    h_bar(2) = delta_t * (2.d0 / 15.d0)
+    h_bar(3) = delta_t * (5.d0 / 15.d0)
+    beta_bar(1) = 1.d0
+    beta_bar(2) = 25.d0 / 8.d0
+    beta_bar(3) = 9.d0 / 4.d0
+    zeta_bar(1) = 0.d0
+    zeta_bar(2) = -17.d0 / 8.d0
+    zeta_bar(3) = -5.d0 / 4.d0
+  
+  end
 
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   subroutine allocate_all

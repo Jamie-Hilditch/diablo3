@@ -1,20 +1,13 @@
 module domain
+  use parameters
   use hdf5
   use mpi_f08
   implicit none
   save
 
-  integer  verbosity
-
-  ! Specify data-types
-  integer, parameter :: single_kind = kind(0.0)
-  integer, parameter :: double_kind = kind(0.d0)
-  integer, parameter :: rkind = double_kind
-
   ! Details of the Computational Domain
   ! (We hardwire these into the code so that the compiler may perform
   !  optimizations based on the grid size at compile time).
-  integer num_per_dir
   integer :: Nx, Ny, Nz, N_th
   integer :: NprocY, NprocZ, Nprocs,  NprocShared
   include 'grid_def'
@@ -49,7 +42,7 @@ module domain
 
 
   ! MPI Details
-  logical :: use_mpi
+  
   integer :: rank, rankY, rankZ, rankShared
   type(mpi_comm) :: mpi_comm_y, mpi_comm_z, mpi_comm_shared
   type(mpi_status) :: status
@@ -60,31 +53,7 @@ module domain
   type(mpi_win) :: temp_fft_win
 
   ! Movie
-  real(rkind)   XcMovie, YcMovie, ZcMovie
   integer       NxMovie, NyMovie, NzMovie, rankyMovie, rankzMovie
-
-
-  ! Physical Domain
-  real(rkind)         Lx, Ly, Lz
-
-  ! BCs & Values
-  integer   u_BC_Xmin, v_BC_Xmin, w_BC_Xmin, th_BC_Xmin(1:N_th)
-  integer   u_BC_Xmax, v_BC_Xmax, w_BC_Xmax, th_BC_Xmax(1:N_th)
-  integer   u_BC_Ymin, v_BC_Ymin, w_BC_Ymin, th_BC_Ymin(1:N_th)
-  integer   u_BC_Ymax, v_BC_Ymax, w_BC_Ymax, th_BC_Ymax(1:N_th)
-  integer   u_BC_Zmin, v_BC_Zmin, w_BC_Zmin, th_BC_Zmin(1:N_th)
-  integer   u_BC_Zmax, v_BC_Zmax, w_BC_Zmax, th_BC_Zmax(1:N_th)
-
-  real(rkind)   u_BC_Xmin_c1, v_BC_Xmin_c1, w_BC_Xmin_c1
-  real(rkind)   u_BC_Ymin_c1, v_BC_Ymin_c1, w_BC_Ymin_c1
-  real(rkind)   u_BC_Zmin_c1, v_BC_Zmin_c1, w_BC_Zmin_c1
-  real(rkind)   th_BC_Xmin_c1(1:N_th), th_BC_Ymin_c1(1:N_th), th_BC_Zmin_c1(1:N_th)
-  real(rkind)   u_BC_Xmax_c1, v_BC_Xmax_c1, w_BC_Xmax_c1
-  real(rkind)   u_BC_Ymax_c1, v_BC_Ymax_c1, w_BC_Ymax_c1
-  real(rkind)   u_BC_Zmax_c1, v_BC_Zmax_c1, w_BC_Zmax_c1
-  real(rkind)   th_BC_Xmax_c1(1:N_th), th_BC_Ymax_c1(1:N_th), th_BC_Zmax_c1(1:N_th)
-
-
 
 contains
 

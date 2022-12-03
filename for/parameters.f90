@@ -1,25 +1,39 @@
+! Define parameters used throughout diablo
+! Contains subroutines to read input files and set parameters
+
 module parameters
-  use fft
-  use domain
+  ! tomlf library optional
 #ifdef TOML_INPUT 
-  use toml 
+  use tomlf, only: toml_table, toml_parse, toml_error, get_value  
 #endif
   implicit none
   save
 
+  ! current version - update if code is edited to invalidate old input files
+  real :: current_version = 3.4
 
-  real(rkind)  time
-  integer time_step, rk_step
-  real(rkind) save_flow_time, save_stats_time, save_movie_time
+  ! Specify data-types
+  integer, parameter :: single_kind = kind(0.0)
+  integer, parameter :: double_kind = kind(0.d0)
+  integer, parameter :: rkind = double_kind
 
-  integer previous_time_step
+  real(rkind) :: time
+  integer :: time_step, rk_step
+  real(rkind) :: save_flow_time, save_stats_time, save_movie_time
 
-  ! Input.dat
+  integer :: previous_time_step
+
+  
+
+  ! Parameters defined in input.dat
+  real :: version
   character(len=35)   flavor
+  logical             use_mpi
   logical             use_LES
   real(rkind)         nu
   real(rkind)         nu_v_scale
   real(rkind)         beta
+  real(rkind)         Lx, Ly, Lz
   real(rkind)         delta_t, dt, delta_t_next_event, kick, ubulk0, px0
 
   logical             create_new_flow
@@ -31,8 +45,10 @@ module parameters
   real(rkind)         CFL
   integer             update_dt
 
+  integer             verbosity
   real(rkind)         save_flow_dt, save_stats_dt
   real(rkind)         save_movie_dt
+  real(rkind)         XcMovie, YcMovie, ZcMovie
 
   logical             create_new_th(1:N_th)
   real(rkind)         Ri(1:N_th), Pr(1:N_th)
@@ -63,65 +79,53 @@ module parameters
 
 
   ! Numerical parameters
-  real(rkind)  h_bar(3), beta_bar(3), zeta_bar(3) ! For RK
+  integer num_per_dir
   integer  time_ad_meth
   integer les_model_type
 
+  ! BCs & Values
+  integer :: u_BC_Xmin, v_BC_Xmin, w_BC_Xmin, th_BC_Xmin(1:N_th)
+  integer :: u_BC_Xmax, v_BC_Xmax, w_BC_Xmax, th_BC_Xmax(1:N_th)
+  integer :: u_BC_Ymin, v_BC_Ymin, w_BC_Ymin, th_BC_Ymin(1:N_th)
+  integer :: u_BC_Ymax, v_BC_Ymax, w_BC_Ymax, th_BC_Ymax(1:N_th)
+  integer :: u_BC_Zmin, v_BC_Zmin, w_BC_Zmin, th_BC_Zmin(1:N_th)
+  integer :: u_BC_Zmax, v_BC_Zmax, w_BC_Zmax, th_BC_Zmax(1:N_th)
 
-
-
+  real(rkind) :: u_BC_Xmin_c1, v_BC_Xmin_c1, w_BC_Xmin_c1
+  real(rkind) :: u_BC_Ymin_c1, v_BC_Ymin_c1, w_BC_Ymin_c1
+  real(rkind) :: u_BC_Zmin_c1, v_BC_Zmin_c1, w_BC_Zmin_c1
+  real(rkind) :: th_BC_Xmin_c1(1:N_th), th_BC_Ymin_c1(1:N_th), th_BC_Zmin_c1(1:N_th)
+  real(rkind) :: u_BC_Xmax_c1, v_BC_Xmax_c1, w_BC_Xmax_c1
+  real(rkind) :: u_BC_Ymax_c1, v_BC_Ymax_c1, w_BC_Ymax_c1
+  real(rkind) :: u_BC_Zmax_c1, v_BC_Zmax_c1, w_BC_Zmax_c1
+  real(rkind) :: th_BC_Xmax_c1(1:N_th), th_BC_Ymax_c1(1:N_th), th_BC_Zmax_c1(1:N_th)
 
 
 contains
 
+
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
-  subroutine init_parameters
+  subroutine read_input
+    !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+    ! read in input parameters
+#ifdef TOML_INPUT
+    ! read parameters from input.toml
+    call read_input_toml
+#else
+    ! read in parameters from input.dat
+    call read_input_dat
+#endif
+
+  end
+
+
+  !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+  subroutine log_parameters
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
 
-    integer n
-    logical start_file_exists
-    
-    ! read in parameters from input.dat
-    call read_input
-
-
-    ! Initialize MPI Variables
-    call init_mpi
-
-
-    if (rank == 0) then
-      write (*, *)
-      write (*, *) '             ****** WELCOME TO DIABLO ******'
-      write (*, *)
-    end if
-
-    inquire (file="start.h5", exist=start_file_exists)
-    if (start_file_exists) then
-      create_new_flow = .false.
-      create_new_th(1) = .false.
-    end if
-
-
-    ! Initialize case-specific packages
-    if (num_per_dir == 3) then
-      stop 'Error: Triply-Periodic Box has been deprecated!'
-    elseif (num_per_dir == 2) then
-      call read_input_chan
-      call create_grid_chan
-      call init_chan_mpi
-      if (save_movie_dt /= 0) then
-        call init_chan_movie
-      end if
-    elseif (num_per_dir == 1) then
-      stop 'Error: Duct not implemented!'
-    elseif (num_per_dir == 0) then
-      stop 'Error: Cavity not implemented!'
-    end if
-
-    if (rank == 0) &
-      write (*, '("Use LES: " L1)') use_LES
-
-    ! Initialize grid
+    integer n  
+  
+    ! log parameters
     if (rank == 0) then
       write (*, '("Flavor:  ", A35)') flavor
       write (*, '("Nx    =  ", I10)') Nx
@@ -132,42 +136,29 @@ contains
         write (*, '("  Richardson number = ", ES12.5)') Ri(n)
         write (*, '("  Prandtl number    = ", ES12.5)') Pr(n)
       end do
+      write (*, '("Use LES: " L1)') use_LES
       write (*, '("Nu   = ", ES12.5)') nu
       write (*, '("Beta = ", ES12.5)') beta
     end if
 
-    ! Initialize RKW3 parameters.
-    h_bar(1) = delta_t * (8.d0 / 15.d0)
-    h_bar(2) = delta_t * (2.d0 / 15.d0)
-    h_bar(3) = delta_t * (5.d0 / 15.d0)
-    beta_bar(1) = 1.d0
-    beta_bar(2) = 25.d0 / 8.d0
-    beta_bar(3) = 9.d0 / 4.d0
-    zeta_bar(1) = 0.d0
-    zeta_bar(2) = -17.d0 / 8.d0
-    zeta_bar(3) = -5.d0 / 4.d0
-
+    
 
     return
   end
 
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
-  subroutine read_input
+  subroutine read_input_dat
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
-    
-    real version, current_version
 
     integer n
     real(rkind) Re
     
-
     open (11, file='input.dat', form='formatted', status='old')
 
     ! Read input file.
     !   (Note - if you change the following section of code, update the
-    !    CURRENT_VERSION number to make obsolete previous input files !)
+    !    current_version number to make obsolete previous input files !)
 
-    current_version = 3.4
     read (11, *)
     read (11, *)
     read (11, *)
@@ -205,7 +196,7 @@ contains
   subroutine read_input_chan
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
 
-    real version, current_version
+    
     integer n
     real(rkind) ro
 
@@ -301,7 +292,20 @@ contains
     return
   end
 
+  ! only define toml input options if using the tomlf library
+#ifdef TOML_INPUT 
 
+  !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+  subroutine read_input_toml
+    !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+  end
+
+  !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+  subroutine read_input_chan_toml
+    !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+  end
+
+#endif ! TOML_INPUT
 
 
 end module parameters
