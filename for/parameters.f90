@@ -75,50 +75,10 @@ contains
   subroutine init_parameters
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
 
-    real version, current_version
-
-    integer i, j, k, n
-    real(rkind) Re
     logical start_file_exists
-
-    open (11, file='input.dat', form='formatted', status='old')
-
-    ! Read input file.
-    !   (Note - if you change the following section of code, update the
-    !    CURRENT_VERSION number to make obsolete previous input files !)
-
-    current_version = 3.4
-    read (11, *)
-    read (11, *)
-    read (11, *)
-    read (11, *)
-    read (11, *) flavor, version
-    if (version /= current_version) stop 'Wrong input data format.'
-    read (11, *)
-    read (11, *) use_mpi, use_LES
-    if (use_mpi .eqv. .false.) stop 'Serial processing has been deprecated in diablo3.'
-    read (11, *)
-    read (11, *) Re, beta, Lx, Lz, Ly
-    nu = 1.d0 / Re
-    read (11, *)
-    read (11, *) nu_v_scale
-    read (11, *)
-    read (11, *) num_per_dir, create_new_flow
-    read (11, *)
-    read (11, *) wall_time_limit, time_limit, delta_t, reset_time, &
-      variable_dt, CFL, update_dt
-    read (11, *)
-    read (11, *) verbosity, save_flow_dt, save_stats_dt, save_movie_dt, XcMovie, ZcMovie, YcMovie
-    read (11, *)
-    ! Read in the parameters for the N_th scalars
-    do n = 1, N_th
-      read (11, *)
-      read (11, *) create_new_th(n)
-      read (11, *)
-      read (11, *) filter_th(n), filter_int(n)
-      read (11, *)
-      read (11, *) Ri(n), Pr(n)
-    end do
+    
+    ! read in parameters from input.dat
+    call read_input
 
 
     ! Initialize MPI Variables
@@ -142,7 +102,7 @@ contains
     if (num_per_dir == 3) then
       stop 'Error: Triply-Periodic Box has been deprecated!'
     elseif (num_per_dir == 2) then
-      call input_chan
+      call read_input_chan
       call create_grid_chan
       call init_chan_mpi
       if (save_movie_dt /= 0) then
@@ -187,11 +147,58 @@ contains
     return
   end
 
+  !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+  subroutine read_input
+    !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+    
+    real version, current_version
 
+    integer i, j, k, n
+    real(rkind) Re
+    
 
+    open (11, file='input.dat', form='formatted', status='old')
+
+    ! Read input file.
+    !   (Note - if you change the following section of code, update the
+    !    CURRENT_VERSION number to make obsolete previous input files !)
+
+    current_version = 3.4
+    read (11, *)
+    read (11, *)
+    read (11, *)
+    read (11, *)
+    read (11, *) flavor, version
+    if (version /= current_version) stop 'Wrong input data format.'
+    read (11, *)
+    read (11, *) use_mpi, use_LES
+    if (use_mpi .eqv. .false.) stop 'Serial processing has been deprecated in diablo3.'
+    read (11, *)
+    read (11, *) Re, beta, Lx, Lz, Ly
+    nu = 1.d0 / Re
+    read (11, *)
+    read (11, *) nu_v_scale
+    read (11, *)
+    read (11, *) num_per_dir, create_new_flow
+    read (11, *)
+    read (11, *) wall_time_limit, time_limit, delta_t, reset_time, &
+      variable_dt, CFL, update_dt
+    read (11, *)
+    read (11, *) verbosity, save_flow_dt, save_stats_dt, save_movie_dt, XcMovie, ZcMovie, YcMovie
+    read (11, *)
+    ! Read in the parameters for the N_th scalars
+    do n = 1, N_th
+      read (11, *)
+      read (11, *) create_new_th(n)
+      read (11, *)
+      read (11, *) filter_th(n), filter_int(n)
+      read (11, *)
+      read (11, *) Ri(n), Pr(n)
+    end do
+  end
 
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
-  subroutine input_chan
+  subroutine read_input_chan
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
 
     real version, current_version
