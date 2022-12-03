@@ -75,6 +75,7 @@ contains
   subroutine init_parameters
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
 
+    integer n
     logical start_file_exists
     
     ! read in parameters from input.dat
@@ -153,7 +154,7 @@ contains
     
     real version, current_version
 
-    integer i, j, k, n
+    integer n
     real(rkind) Re
     
 
@@ -202,7 +203,7 @@ contains
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
 
     real version, current_version
-    integer i, j, k, n
+    integer n
     real(rkind) ro
 
     ! Read in input parameters specific for channel flow case
