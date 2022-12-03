@@ -72,9 +72,9 @@ module parameters
 
 contains
 
-  #ifdef TOML_INPUT
-    include 'toml.f90' 
-  #endif
+#ifdef TOML_INPUT
+  include 'toml.f90' 
+#endif
 
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   subroutine init_parameters
