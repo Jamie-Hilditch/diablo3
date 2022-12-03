@@ -1,6 +1,9 @@
 module parameters
   use fft
   use domain
+  #ifdef TOML_INPUT
+    use toml 
+  #endif
   implicit none
   save
 
