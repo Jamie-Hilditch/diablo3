@@ -1,27 +1,27 @@
 # !/bin/bash
 
 # Input: Number of Processors
-if [[ $1 =~ [^0-9]+ ]] then
+if [[ $1 =~ [0-9]+ ]]; then
   NPz=$1
 else
   echo "First argument NPz must be a positive integer"
   exit 1
 fi 
 
-if [[ $2 =~ [^0-9]+ ]] then
+if [[ $2 =~ [0-9]+ ]]; then
   NPy=$2
 else
   echo "Second argument NPy must be a positive integer"
   exit 1
 fi 
 
-if [[ $3 -eq "--debug"] -o [ $4 -eq "--debug"]]
+if [ "$3" = "--debug" ] || [ "$4" = "--debug" ]; then
   DEBUG=TRUE
 else
   DEBUG=FALSE
 fi
 
-if [[ $3 -eq "--shared"] -o [ $4 -eq "--shared"]]
+if [ "$3" = "--shared" ] || [ "$4" = "--shared" ]; then
   SHARED_MEMORY=TRUE
 else
   SHARED_MEMORY=FALSE
@@ -52,7 +52,7 @@ fi
 
 # Compile the code (in build)
 make clean
-make DEBUG=$(DEBUG) SHARED_MEMORY=$(SHARED_MEMORY)
+make DEBUG=$DEBUG SHARED_MEMORY=$SHARED_MEMORY
 
 # Copy the executable back to the run dir
 cp diablo $rundir
