@@ -6,7 +6,6 @@ module ics
     use flow
     use phdf5
     implicit none
-    save 
 
     integer :: num_read_th
     integer :: read_th_index(1:N_th)

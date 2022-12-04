@@ -51,7 +51,7 @@ program diablo
   use control
   use statistics
   implicit none 
-  
+
   integer :: n
   logical :: flag
 
@@ -112,6 +112,10 @@ program diablo
     ! Save statistics to an output file
     if (time >= save_stats_time) then
       call save_stats
+      if (flag .and. use_LES) then
+        ! if stopping we can't save LES stats now
+        call save_stats_LES_OOL(.false.)
+      end if 
     end if
 
     ! Save entire flow to a file 
@@ -135,6 +139,7 @@ program diablo
 
   ! create the end file
   call save_flow(.true.)
+  end if
 
   ! tidy up
   !call deallocate_all

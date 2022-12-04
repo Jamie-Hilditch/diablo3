@@ -4,6 +4,8 @@ module control
   use flow
   use phdf5 
   use statistics
+  implicit none 
+  save
 
   real(rkind) :: start_wall_time, previous_wall_time, end_wall_time
 
@@ -80,17 +82,16 @@ contains
 
     call wall_time(wall_begin)
 
-    flag_save_LES = .true.
+    
     if (time >= save_movie_time) then
       call save_stats_chan(.true.,.false.)
       save_movie_time = save_stats_time + save_movie_dt - save_stats_dt*1.d-5 ! Increment from stats_time
     else
       call save_stats_chan(.false.,.false.)
     end if
-    if (flag .and. use_LES) then ! Won't get into the next RK to save LES
-      call save_stats_LES_OOL(.false.)
-    end if
+
     save_stats_time = save_stats_time + save_stats_dt
+    flag_save_LES = .true. ! save LES stats on next RK step
 
     call wall_time(end_wall_time)
 
