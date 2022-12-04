@@ -4,7 +4,8 @@
 module phdf5
   use parameters 
   use domain 
-  use flow 
+  use flow
+  use tools 
   use hdf5
   implicit none
   save

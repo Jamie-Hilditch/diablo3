@@ -61,7 +61,7 @@ flow.o: flow.f90 parameters.o domain.o fft.o
 
 tools.o: tools.f90 parameters.o domain.o flow.o
 
-phdf5.o: phdf5.f90 parameters.o domain.o flow.o
+phdf5.o: phdf5.f90 parameters.o domain.o flow.o tools.o
 
 boundary.o: boundary.f90 parameters.o domain.o fft.o flow.o
 
