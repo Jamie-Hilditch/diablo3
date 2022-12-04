@@ -4,6 +4,7 @@ module statistics
   use fft
   use flow 
   use boundary
+  use phdf5
   implicit none
   save
 
