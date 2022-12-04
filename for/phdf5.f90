@@ -57,18 +57,18 @@ contains
     integer(hsize_t), dimension(1) :: dims
 
     integer :: rHDF5 = 1
-    integer(hsize_t), dimension(1)       :: adims
-    integer(hid_t)                      :: dspace_id, aid, tspace
+    integer(hsize_t), dimension(1) :: adims
+    integer(hid_t) :: dspace_id, aid, tspace
 
     
-    integer nsamp
-    logical flage
+    integer :: nsamp
+    logical :: flage
 
     integer(hsize_t), dimension(1) :: count, offset
-    integer(hsize_t), dimension(1) :: stride, block, offset_m
+    integer(hsize_t), dimension(1) :: stride, block1, offset_m
 
     ! integer(hsize_t)  ::  my_dim
-    integer Error, i, j
+    integer :: Error, i, j
 
     ! We only need one process to write to file
     if (rank == 0) then
@@ -77,7 +77,7 @@ contains
       nsamp = 1
       dims = 1
       stride = 1
-      block = 1
+      block1 = 1
       count = 1
       dimsf = 1
 
@@ -126,7 +126,7 @@ contains
 
       call h5screate_simple_f(rHDF5, dimsf, filspace_id, Error)
       call h5sselect_hyperslab_f(filspace_id, h5s_select_set_f, &
-                                offset, count, Error, stride, block)
+                                offset, count, Error, stride, block1)
 
       ! Write the new number of samples to the file
       call h5aopen_f(gid, 'SAMPLES', aid, Error)
@@ -144,7 +144,6 @@ contains
 
       call h5close_f(Error)
 
-      ! End if RANK=0
     end if 
 
     ! Sync the cores as a precaution (probably not necessary)
@@ -162,10 +161,11 @@ contains
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
     ! Writes a vector of values in Y (Vertical)
 
-    character(len=12) fname
+    character(len=12), intent(in) :: fname
+    real(rkind), intent(in) :: Diag(1:Nyp)
+    character(len=20), intent(in) :: gname
 
-    ! Dataset names
-    character(len=20) :: gname, dname
+    character(len=20) :: dname
 
     ! Identifiers
     integer(hid_t) :: file_id, dset_id
@@ -182,12 +182,12 @@ contains
     integer(hsize_t), dimension(1)       :: adims
     integer(hid_t)                      :: aid, tspace
 
-    real(rkind) Diag(1:Nyp)
+    
     integer nsamp
     logical flage
 
     integer(hsize_t), dimension(1) :: count, offset
-    integer(hsize_t), dimension(1) :: stride, block, offset_m
+    integer(hsize_t), dimension(1) :: stride, block1, offset_m
 
     ! integer(hsize_t)  ::  my_dim
     integer Error, i, j
@@ -208,11 +208,11 @@ contains
 
     !  offset_m(1:2)=0
     if (rankY == 0) then
-      block = Nyp
+      block1 = Nyp
       offset = 0
       offset_m = 0
     else
-      block = (Nyp - 1)
+      block1 = (Nyp - 1)
       offset = rankY * (Nyp - 1) + 1
       offset_m = 1
     end if
@@ -275,9 +275,9 @@ contains
     call h5screate_simple_f(rHDF5, dimsm, memspace_id, Error)
 
     call h5sselect_hyperslab_f(filspace_id, h5s_select_set_f, &
-                              offset, count, Error, stride, block)
+                              offset, count, Error, stride, block1)
     call h5sselect_hyperslab_f(memspace_id, h5s_select_set_f, &
-                              offset_m, count, Error, stride, block)
+                              offset_m, count, Error, stride, block1)
 
     call h5aopen_f(gid, 'SAMPLES', aid, Error)
     call h5awrite_f(aid, h5t_native_integer, nsamp, adims, Error)
@@ -316,7 +316,6 @@ contains
   subroutine WriteStatH5_X(fname, gname, Diag, NperProc)
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
     ! Writes a vector of values in X
-    use hdf5
 
     character(len=12) fname
 
@@ -345,7 +344,7 @@ contains
     logical flage
 
     integer(hsize_t), dimension(1) :: count, offset
-    integer(hsize_t), dimension(1) :: stride, block, offset_m
+    integer(hsize_t), dimension(1) :: stride, block1, offset_m
 
     ! integer(hsize_t)  ::  my_dim
     integer Error, i, j
@@ -365,7 +364,7 @@ contains
     !  offset(1) = 0
     !  offset_m(1:2)=0
 
-    block = NperProc
+    block1 = NperProc
     offset = rankZ * NperProc
     offset_m = 0
 
@@ -428,9 +427,9 @@ contains
     call h5screate_simple_f(rHDF5, dimsm, memspace_id, Error)
 
     call h5sselect_hyperslab_f(filspace_id, h5s_select_set_f, &
-                              offset, count, Error, stride, block)
+                              offset, count, Error, stride, block1)
     call h5sselect_hyperslab_f(memspace_id, h5s_select_set_f, &
-                              offset_m, count, Error, stride, block)
+                              offset_m, count, Error, stride, block1)
 
     call h5aopen_f(gid, 'SAMPLES', aid, Error)
     call h5awrite_f(aid, h5t_native_integer, nsamp, adims, Error)
@@ -469,7 +468,6 @@ contains
   subroutine WriteHDF5_XYplane(fname, gname, var2d)
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
     ! Writes out entire X-Y plane
-    use hdf5
 
     character(len=35) fname
 
@@ -496,7 +494,7 @@ contains
     logical flage
 
     integer(hsize_t), dimension(2) :: count, offset
-    integer(hsize_t), dimension(2) :: stride, block, offset_m
+    integer(hsize_t), dimension(2) :: stride, block1, offset_m
 
     ! integer(hsize_t)  ::  my_dim
     integer Error, i, j
@@ -508,7 +506,7 @@ contains
     dimsm(1:2) = (/Nx, Nyp/)
     dimsf(1:2) = (/Nx, (Nyp - 1) * NprocY + 1/)
 
-    block(1) = Nx
+    block1(1) = Nx
 
     ! Stride and count for number of rows and columns in each dimension
     stride = 1
@@ -519,11 +517,11 @@ contains
 
     offset_m(1:2) = 0
     if (rankY == 0) then
-      block(2) = Nyp
+      block1(2) = Nyp
       offset(2) = 0
       offset_m(2) = 0
     else
-      block(2) = (Nyp - 1)
+      block1(2) = (Nyp - 1)
       offset(2) = rankY * (Nyp - 1) + 1
       offset_m(2) = 1
     end if
@@ -586,9 +584,9 @@ contains
     call h5screate_simple_f(rHDF5, dimsm, memspace_id, Error)
 
     call h5sselect_hyperslab_f(filspace_id, h5s_select_set_f, &
-                              offset, count, Error, stride, block)
+                              offset, count, Error, stride, block1)
     call h5sselect_hyperslab_f(memspace_id, h5s_select_set_f, &
-                              offset_m, count, Error, stride, block)
+                              offset_m, count, Error, stride, block1)
 
     call h5aopen_f(gid, 'SAMPLES', aid, Error)
     call h5awrite_f(aid, h5t_native_integer, nsamp, adims, Error)
@@ -627,7 +625,6 @@ contains
   subroutine WriteHDF5_XZplane(fname, gname, var2d)
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
     ! Writes out entire X-Z plane
-    use hdf5
 
     character(len=35) fname
 
@@ -654,7 +651,7 @@ contains
     logical flage
 
     integer(hsize_t), dimension(2) :: count, offset
-    integer(hsize_t), dimension(2) :: stride, block, offset_m
+    integer(hsize_t), dimension(2) :: stride, block1, offset_m
 
     ! integer(hsize_t)  ::  my_dim
     integer Error, i, j
@@ -666,8 +663,8 @@ contains
     dimsm(1:2) = (/Nx, Nzp/)
     dimsf(1:2) = (/Nx, Nz/)
 
-    block(1) = Nx
-    block(2) = Nzp
+    block1(1) = Nx
+    block1(2) = Nzp
 
     ! Stride and count for number of rows and columns in each dimension
     stride = 1
@@ -737,9 +734,9 @@ contains
     call h5screate_simple_f(rHDF5, dimsm, memspace_id, Error)
 
     call h5sselect_hyperslab_f(filspace_id, h5s_select_set_f, &
-                              offset, count, Error, stride, block)
+                              offset, count, Error, stride, block1)
     call h5sselect_hyperslab_f(memspace_id, h5s_select_set_f, &
-                              offset_m, count, Error, stride, block)
+                              offset_m, count, Error, stride, block1)
 
     call h5aopen_f(gid, 'SAMPLES', aid, Error)
     call h5awrite_f(aid, h5t_native_integer, nsamp, adims, Error)
@@ -776,7 +773,6 @@ contains
   subroutine WriteHDF5_ZYplane(fname, gname, var2d)
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
     ! Writes out entire Z-Y plane
-    use hdf5
 
     character(len=35) fname
 
@@ -803,7 +799,7 @@ contains
     logical flage
 
     integer(hsize_t), dimension(2) :: count, offset
-    integer(hsize_t), dimension(2) :: stride, block, offset_m
+    integer(hsize_t), dimension(2) :: stride, block1, offset_m
 
     ! integer(hsize_t)  ::  my_dim
     integer Error, i, j
@@ -815,7 +811,7 @@ contains
     dimsm(1:2) = (/Nzp, Nyp/)
     dimsf(1:2) = (/Nz, (Nyp - 1) * NprocY + 1/)
 
-    block(1) = Nzp
+    block1(1) = Nzp
 
     ! Stride and count for number of rows and columns in each dimension
     stride = 1
@@ -826,11 +822,11 @@ contains
     offset_m(1:2) = 0
 
     if (rankY == 0) then
-      block(2) = Nyp
+      block1(2) = Nyp
       offset(2) = 0
       offset_m(2) = 0
     else
-      block(2) = (Nyp - 1)
+      block1(2) = (Nyp - 1)
       offset(2) = rankY * (Nyp - 1) + 1
       offset_m(2) = 1
     end if
@@ -893,9 +889,9 @@ contains
     call h5screate_simple_f(rHDF5, dimsm, memspace_id, Error)
 
     call h5sselect_hyperslab_f(filspace_id, h5s_select_set_f, &
-                              offset, count, Error, stride, block)
+                              offset, count, Error, stride, block1)
     call h5sselect_hyperslab_f(memspace_id, h5s_select_set_f, &
-                              offset_m, count, Error, stride, block)
+                              offset_m, count, Error, stride, block1)
 
     call h5aopen_f(gid, 'SAMPLES', aid, Error)
     call h5awrite_f(aid, h5t_native_integer, nsamp, adims, Error)
@@ -935,7 +931,6 @@ contains
   subroutine WriteHDF5(fname, save_pressure)
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
     ! Writes full 3D output/checkpoint file
-    use hdf5
 
     character(len=55) fname
     logical save_pressure
@@ -957,7 +952,7 @@ contains
     integer(hsize_t), dimension(3) :: dimsm, dimsf
 
     integer(hsize_t), dimension(3) :: chunk_dims, count, offset
-    integer(hsize_t), dimension(3) :: stride, block, offset_m
+    integer(hsize_t), dimension(3) :: stride, block1, offset_m
 
     integer :: rHDF5 = 3, arank = 1
 
@@ -996,8 +991,8 @@ contains
     chunk_dims(2) = 1
     chunk_dims(3) = Nzp
 
-    block(1) = Nx
-    block(3) = Nzp
+    block1(1) = Nx
+    block1(3) = Nzp
 
     ! Stride and count for number of rows and columns in each dimension
     stride = 1
@@ -1009,11 +1004,11 @@ contains
 
     offset_m(1:3) = 0
     if (rankY == 0) then
-      block(2) = Nyp
+      block1(2) = Nyp
       offset(2) = 0
       offset_m(2) = 0
     else
-      block(2) = (Nyp - 1)
+      block1(2) = (Nyp - 1)
       offset(2) = rankY * (Nyp - 1) + 1
       offset_m(2) = 1
     end if
@@ -1144,10 +1139,10 @@ contains
       ! Select hyperslab in the file.
       ! call h5dget_space_f(dsetur_id, selspace_id, Error)
       call h5sselect_hyperslab_f(filspace_id, h5s_select_set_f, &
-                                offset, count, Error, stride, block)
+                                offset, count, Error, stride, block1)
 
       call h5sselect_hyperslab_f(memspace_id, h5s_select_set_f, &
-                                offset_m, count, Error, stride, block)
+                                offset_m, count, Error, stride, block1)
 
       ! Write the dataset collectively
       call h5dwrite_f(dset_id, h5t_native_double, &
@@ -1172,10 +1167,10 @@ contains
       ! Select hyperslab in the file.
       ! call h5dget_space_f(dsetur_id, selspace_id, Error)
       call h5sselect_hyperslab_f(filspace_id, h5s_select_set_f, &
-                                offset, count, Error, stride, block)
+                                offset, count, Error, stride, block1)
 
       call h5sselect_hyperslab_f(memspace_id, h5s_select_set_f, &
-                                offset_m, count, Error, stride, block)
+                                offset_m, count, Error, stride, block1)
 
       ! Write the dataset collectively
       call h5dwrite_f(dset_id, h5t_native_double, &
@@ -1221,7 +1216,6 @@ contains
   subroutine ReadHDF5(fname, read_pressure)
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
     ! Reads full 3D output/checkpoint file
-    use hdf5
 
     character(len=55), intent(in) :: fname
     logical, intent(out) :: read_pressure
@@ -1245,7 +1239,7 @@ contains
     integer(hsize_t), dimension(3) :: dimsm, dimsf
 
     integer(hsize_t), dimension(3) :: count, offset
-    integer(hsize_t), dimension(3) :: stride, block, offset_m
+    integer(hsize_t), dimension(3) :: stride, block1, offset_m
 
     integer :: rHDF5 = 3
 
@@ -1271,8 +1265,8 @@ contains
     ! on the way back we just invert the relation in order to have
     ! exact values.
 
-    block(1) = Nx
-    block(3) = Nzp
+    block1(1) = Nx
+    block1(3) = Nzp
 
     ! Stride and count for number of rows and columns in each dimension
     stride = 1
@@ -1282,7 +1276,7 @@ contains
     offset(1) = 0
     offset(3) = rankZ * Nzp
 
-    block(2) = Nyp
+    block1(2) = Nyp
     offset(2) = rankY * (Nyp - 1)
 
     ! Initialize interface
@@ -1379,11 +1373,11 @@ contains
 
         ! Select hyperslab in the file
         call h5sselect_hyperslab_f(filspace_id, h5s_select_set_f, &
-                                  offset, count, Error, stride, block)
+                                  offset, count, Error, stride, block1)
 
         offset_m(1:3) = 0
         call h5sselect_hyperslab_f(memspace_id, h5s_select_set_f, &
-                                  offset_m, count, Error, stride, block)
+                                  offset_m, count, Error, stride, block1)
 
         ! Write the dataset collectively
         call h5dread_f(dset_id, h5t_native_double, &
@@ -1421,11 +1415,11 @@ contains
 
       ! Select hyperslab in the file
       call h5sselect_hyperslab_f(filspace_id, h5s_select_set_f, &
-                                offset, count, Error, stride, block)
+                                offset, count, Error, stride, block1)
 
       offset_m(1:3) = 0
       call h5sselect_hyperslab_f(memspace_id, h5s_select_set_f, &
-                                offset_m, count, Error, stride, block)
+                                offset_m, count, Error, stride, block1)
 
       ! Write the dataset collectively
       call h5dread_f(dset_id, h5t_native_double, &

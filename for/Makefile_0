@@ -67,7 +67,7 @@ ics.o: ics.f90 parameters.o domain.o fft.o flow.o phdf5.o
 
 les.o: les.f90 parameters.o domain.o fft.o flow.o phdf5.o boundary.o
 
-statistics.o: statistics.f90 parameters.o domain.o fft.o flow.o boundary.o phdf5.o
+statistics.o: statistics.f90 parameters.o domain.o fft.o flow.o boundary.o phdf5.o les.o
 
 advance.o: advance.f90 parameters.o domain.o fft.o flow.o boundary.o les.o channel.f90 forcing.f90
 
