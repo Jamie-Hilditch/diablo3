@@ -113,14 +113,14 @@ program diablo
     if (time >= save_stats_time) then
       call save_stats
       if (flag .and. use_LES) then
-        ! if stopping we can't save LES stats now
+        ! if stopping we must save LES stats now
         call save_stats_LES_OOL(.false.)
       end if 
     end if
 
     ! Save entire flow to a file 
     if (time >= save_flow_time) then
-      save_flow(.false.)
+      call save_flow(.false.)
     end if
 
     ! Check if we're done
@@ -139,7 +139,6 @@ program diablo
 
   ! create the end file
   call save_flow(.true.)
-  end if
 
   ! tidy up
   !call deallocate_all
