@@ -10,7 +10,7 @@ module tools
 contains
 
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
-  subroutine init_tools(val)
+  subroutine init_tools
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
     call wall_time(start_wall_time)
   end
