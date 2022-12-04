@@ -54,6 +54,8 @@ program diablo
   
 
   call read_input ! read inputs from input.dat or input.toml
+  call read_input_chan
+
   call init_mpi ! initialise mpi variables
 
   if (rank == 0) then
@@ -67,7 +69,6 @@ program diablo
   if (num_per_dir == 3) then
     stop 'Error: Triply-Periodic Box has been deprecated!'
   elseif (num_per_dir == 2) then
-    call read_input_chan
     call create_grid_chan
     call init_chan_mpi
     if (save_movie_dt /= 0) then
