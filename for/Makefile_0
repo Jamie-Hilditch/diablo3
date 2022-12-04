@@ -51,9 +51,9 @@ diablo: diablo.f90 $(SOURCES)
 	$(COMPILER) $(FCFLAGS) -c $<
 
 
-parameters.o: parameters.f90
+parameters.o: parameters.f90 grid_def 
 
-domain.o: domain.f90 parameters.o grid_def grid_mpi
+domain.o: domain.f90 parameters.o grid_mpi
 
 fft.o: fft.f90 domain.o
 

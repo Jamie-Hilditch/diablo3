@@ -17,6 +17,12 @@ module parameters
   integer, parameter :: double_kind = kind(0.d0)
   integer, parameter :: rkind = double_kind
 
+  ! Details of the Computational Domain
+  ! (We hardwire these into the code so that the compiler may perform
+  !  optimizations based on the grid size at compile time).
+  integer :: Nx, Ny, Nz, N_th
+  include 'grid_def'
+
   real(rkind) :: time
   integer :: time_step, rk_step
   real(rkind) :: save_flow_time, save_stats_time, save_movie_time
@@ -127,10 +133,10 @@ contains
   
     ! log parameters
     if (rank == 0) then
-      write (*, '("Flavor:  ", A35)') flavor
-      write (*, '("Nx    =  ", I10)') Nx
-      write (*, '("Ny    =  ", I10)') Nz
-      write (*, '("Nz(p) =  ", I10)') Nyp
+      write (*, '("Flavor: ", A35)') flavor
+      write (*, '("Nx = ", I10)') Nx
+      write (*, '("Ny = ", I10)') Ny
+      write (*, '("Nz = ", I10)') Nz
       do n = 1, N_th
         write (*, '("Scalar Number: ", I2)') n
         write (*, '("  Richardson number = ", ES12.5)') Ri(n)
@@ -141,9 +147,6 @@ contains
       write (*, '("Beta = ", ES12.5)') beta
     end if
 
-    
-
-    return
   end
 
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|

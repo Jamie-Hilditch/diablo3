@@ -5,12 +5,8 @@ module domain
   implicit none
   save
 
-  ! Details of the Computational Domain
-  ! (We hardwire these into the code so that the compiler may perform
-  !  optimizations based on the grid size at compile time).
-  integer :: Nx, Ny, Nz, N_th
+  ! MPI parameters
   integer :: NprocY, NprocZ, Nprocs,  NprocShared
-  include 'grid_def'
   include 'grid_mpi'
   integer, parameter :: Nyp = (Ny-1)/NprocY + 1
   integer, parameter :: Nxp = Nx/(2*NprocZ) ! Nkxp... Since only need half in Fourier Space for Reals
@@ -32,17 +28,13 @@ module domain
   integer       jstart, jend
   integer       jstart_th(1:N_th), jend_th(1:N_th)
 
-
   ! FFT Grid
   real(rkind)   kx(0:Nxp), kz(0:2*Nkz), &
                 kx2(0:Nxp), kz2(0:2*Nkz), &
                 pi, eps, rNx, rNyp, rNz
   complex(rkind)  cikx(0:Nxp), cikz(0:2*Nkz), ci
 
-
-
   ! MPI Details
-  
   integer :: rank, rankY, rankZ, rankShared
   type(mpi_comm) :: mpi_comm_y, mpi_comm_z, mpi_comm_shared
   type(mpi_status) :: status
