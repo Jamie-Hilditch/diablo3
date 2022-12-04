@@ -5,6 +5,8 @@ module les
   use boundary
   use phdf5
 
+contains
+
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   subroutine les_chan
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
@@ -2523,4 +2525,4 @@ module les
     return
   end
 
-  end module les
+end module les
