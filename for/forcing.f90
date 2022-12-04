@@ -2,7 +2,7 @@
 ! included in advance.f90
 
 !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
- subroutine user_rhs_chan_physical
+subroutine user_rhs_chan_physical
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
 
   ! Here, you can add terms to the right hand side
@@ -30,7 +30,7 @@
 
    ! call slip_vel
 
-   return
+  return
 end
 
 !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
@@ -194,158 +194,158 @@ end
 
 !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
 subroutine slip_vel
- !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
- ! This subroutine adds advection by a slip velocity to some scalars
+  !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+  ! This subroutine adds advection by a slip velocity to some scalars
 
- integer i, j, k, n, j1_th(1:N_th), j2_th(1:N_th)
- real(rkind) w_s(0:Nyp + 1, 1:N_th)
- real(rkind), dimension(5) :: slip_def = (/ 0.d0, 0.d0, 0.00005d0, 0.0005d0, 0.005d0/)
+  integer i, j, k, n, j1_th(1:N_th), j2_th(1:N_th)
+  real(rkind) w_s(0:Nyp + 1, 1:N_th)
+  real(rkind), dimension(5) :: slip_def = (/ 0.d0, 0.d0, 0.00005d0, 0.0005d0, 0.005d0/)
 
- ! Set indices corresponding to start and end of GYF grid
- do n = 1, N_th
+  ! Set indices corresponding to start and end of GYF grid
+  do n = 1, N_th
+    if (rankY == NprocY - 1) then
+      ! We are at the upper wall
+      j1_th(n) = jstart_th(n)
+      j2_th(n) = Nyp - 1
+    else if (rankY == 0) then
+      ! We are at the lower wall
+      j1_th(n) = 2
+      j2_th(n) = jend_th(n)
+    else
+      ! We are on a middle process
+      j1_th(n) = jstart_th(n)
+      j2_th(n) = jend_th(n)
+    end if
+  end do
+
+  ! First, set the slip velocity
+  do j = 0, Nyp + 1
+    do n = 1, N_th
+      w_s(j, n) = slip_def(n)
+    end do
+  end do
+
   if (rankY == NprocY - 1) then
-    ! We are at the upper wall
-    j1_th(n) = jstart_th(n)
-    j2_th(n) = Nyp - 1
+    ! We are on a process at the top boundary
+    ! Set the slip velocity to zero at GY(Nyp) (and ghost cells)
+    do n = 1, N_th
+      w_s(Nyp, n) = 0.d0
+      w_s(Nyp + 1, n) = 0.d0
+    end do
   else if (rankY == 0) then
-    ! We are at the lower wall
-    j1_th(n) = 2
-    j2_th(n) = jend_th(n)
-  else
-    ! We are on a middle process
-    j1_th(n) = jstart_th(n)
-    j2_th(n) = jend_th(n)
+    ! We are on a process at the bottom boundary
+    ! Set the slip velocity to zero at GY(2) (and ghost cells)
+    do n = 1, N_th
+      w_s(0, n) = 0.d0
+      w_s(1, n) = 0.d0
+      w_s(2, n) = 0.d0
+    end do
   end if
- end do
 
- ! First, set the slip velocity
- do j = 0, Nyp + 1
   do n = 1, N_th
-    w_s(j, n) = slip_def(n)
-  end do
- end do
+    do j = j1_th(n), j2_th(n)
+      do k = 0, Nzp - 1
+        do i = 0, Nxm1
+          ! Central differencing
+          !              S1(I,K,J)=
+          !     &     ((TH(I,K,J+1,N)*W_S(J+1,N) + TH(I,K,J,N)*W_S(J+1,N)
+          !     &    -TH(I,K,J,N)*W_S(J,N)-TH(I,K,J-1,N)*W_S(J,n))/(2.d0*DYF(J)))
+          ! Second order Upwinding
+          !              S1(I,K,J)=(W_S(J+1,N)*TH(I,K,J,N)
+          !     &               -W_S(J,N)*(TH(I,K,J,N)+TH(I,K,J-1,N))/2.d0)
+          !     &                 /(GYF(j)-GY(j))
+          ! First order upwinding
+          s1(i, k, j) = (w_s(j + 1, n) * th(i, k, j, n) &
+                        - w_s(j, n) * th(i, k, j - 1, n)) &
+                        / (gyf(j) - gyf(j - 1))
 
- if (rankY == NprocY - 1) then
-  ! We are on a process at the top boundary
-  ! Set the slip velocity to zero at GY(Nyp) (and ghost cells)
-  do n = 1, N_th
-    w_s(Nyp, n) = 0.d0
-    w_s(Nyp + 1, n) = 0.d0
-  end do
- else if (rankY == 0) then
-  ! We are on a process at the bottom boundary
-  ! Set the slip velocity to zero at GY(2) (and ghost cells)
-  do n = 1, N_th
-    w_s(0, n) = 0.d0
-    w_s(1, n) = 0.d0
-    w_s(2, n) = 0.d0
-  end do
- end if
-
- do n = 1, N_th
-  do j = j1_th(n), j2_th(n)
-    do k = 0, Nzp - 1
-      do i = 0, Nxm1
-        ! Central differencing
-        !              S1(I,K,J)=
-        !     &     ((TH(I,K,J+1,N)*W_S(J+1,N) + TH(I,K,J,N)*W_S(J+1,N)
-        !     &    -TH(I,K,J,N)*W_S(J,N)-TH(I,K,J-1,N)*W_S(J,n))/(2.d0*DYF(J)))
-        ! Second order Upwinding
-        !              S1(I,K,J)=(W_S(J+1,N)*TH(I,K,J,N)
-        !     &               -W_S(J,N)*(TH(I,K,J,N)+TH(I,K,J-1,N))/2.d0)
-        !     &                 /(GYF(j)-GY(j))
-        ! First order upwinding
-        s1(i, k, j) = (w_s(j + 1, n) * th(i, k, j, n) &
-                       - w_s(j, n) * th(i, k, j - 1, n)) &
-                      / (gyf(j) - gyf(j - 1))
-
-        !              S1(I,K,J)=0.5d0*(W_S(J+1,N)+W_S(J,N))
-        !     &              *(TH(I,K,J,N)-TH(I,K,J-1,N))/(GYF(J)-GYF(J-1))
+          !              S1(I,K,J)=0.5d0*(W_S(J+1,N)+W_S(J,N))
+          !     &              *(TH(I,K,J,N)-TH(I,K,J-1,N))/(GYF(J)-GYF(J-1))
+        end do
+      end do
+    end do
+    call fft_xz_to_fourier(s1, cs1)
+    do j = j1_th(n), j2_th(n)
+      do k = 0, twoNkz
+        do i = 0, Nxp - 1
+          cfth(i, k, j, n) = cfth(i, k, j, n) - cs1(i, k, j)
+        end do
       end do
     end do
   end do
-  call fft_xz_to_fourier(s1, cs1)
-  do j = j1_th(n), j2_th(n)
-    do k = 0, twoNkz
-      do i = 0, Nxp - 1
-        cfth(i, k, j, n) = cfth(i, k, j, n) - cs1(i, k, j)
-      end do
-    end do
-  end do
- end do
 
- return
+  return
 end
 
 !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
 subroutine sponge_vel
- !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
- ! This subroutine applies a sponge relaxation (Rayleigh damping) towards a
- ! specified background state
- ! The intention is to allow an open boundary
+  !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+  ! This subroutine applies a sponge relaxation (Rayleigh damping) towards a
+  ! specified background state
+  ! The intention is to allow an open boundary
 
- integer i, j, k
+  integer i, j, k
 
- real(rkind) L_sponge, L_bottom
- real(rkind) sponge_amp
+  real(rkind) L_sponge, L_bottom
+  real(rkind) sponge_amp
 
- ! The following variables will store the background state
- real(rkind) u1_0(-1:Nyp + 1), u2_0(0:Nyp + 1), u3_0(-1:Nyp + 1)
+  ! The following variables will store the background state
+  real(rkind) u1_0(-1:Nyp + 1), u2_0(0:Nyp + 1), u3_0(-1:Nyp + 1)
 
- ! This variable will hold the forcing rate
- real(rkind) sponge_sigma(0:Nyp + 1)
+  ! This variable will hold the forcing rate
+  real(rkind) sponge_sigma(0:Nyp + 1)
 
- ! Set the amplitude of the sponge
- sponge_amp = 0.0001d0
- ! Set the top of the sponge layer in physical units
- L_sponge = -120.d0
- ! Set the bottom of the computational domain in physical units
- L_bottom = -140.d0
- do j = 0, Nyp + 1
-  ! Quadratic damping at lower wall
-  if (gyf(j) < L_sponge) then
-    sponge_sigma(j) = sponge_amp * ((L_sponge - gyf(j)) &
-                                    / (L_sponge - L_bottom))**2.d0
-  else
-    sponge_sigma(j) = 0.d0
-  end if
- end do
-
- ! Set the background state
- ! Here, set the background to be geostrophic, with a linear temperature profile
- do j = 0, Nyp + 1
-  u1_0(j) = 0.d0
-  u3_0(j) = 0.d0
- end do
- do j = 0, Nyp + 1
-  u2_0(j) = 0.d0
- end do
-
- ! Add damping function to explicit R-K
- do k = 0, twoNkz
-  do i = 0, Nxp - 1 ! Nkx
-    if ((i /= 0) .or. (k /= 0)) then
-      do j = jstart, jend
-        cf1(i, k, j) = cf1(i, k, j) - sponge_sigma(j) * (cu1(i, k, j) - 0.d0)
-        cf3(i, k, j) = cf3(i, k, j) - sponge_sigma(j) * (cu3(i, k, j) - 0.d0)
-      end do
-      do j = 1, Nyp
-        cf2(i, k, j) = cf2(i, k, j) - &
-                       0.5 * (sponge_sigma(j) + sponge_sigma(j + 1)) * (cu2(i, k, j) - 0.d0)
-      end do
+  ! Set the amplitude of the sponge
+  sponge_amp = 0.0001d0
+  ! Set the top of the sponge layer in physical units
+  L_sponge = -120.d0
+  ! Set the bottom of the computational domain in physical units
+  L_bottom = -140.d0
+  do j = 0, Nyp + 1
+    ! Quadratic damping at lower wall
+    if (gyf(j) < L_sponge) then
+      sponge_sigma(j) = sponge_amp * ((L_sponge - gyf(j)) &
+                                      / (L_sponge - L_bottom))**2.d0
+    else
+      sponge_sigma(j) = 0.d0
     end if
   end do
- end do
- ! Damp mean flow
- do j = jstart, jend
-  cf1(0, 0, j) = cf1(0, 0, j) - sponge_sigma(j) * (cu1(0, 0, j) - u1_0(j))
-  cf3(0, 0, j) = cf3(0, 0, j) - sponge_sigma(j) * (cu3(0, 0, j) - u3_0(j))
- end do
- do j = 1, Nyp
-  cf2(0, 0, j) = cf2(0, 0, j) - sponge_sigma(j) * (cu2(0, 0, j) - u2_0(j))
- end do
 
- return
+  ! Set the background state
+  ! Here, set the background to be geostrophic, with a linear temperature profile
+  do j = 0, Nyp + 1
+    u1_0(j) = 0.d0
+    u3_0(j) = 0.d0
+  end do
+  do j = 0, Nyp + 1
+    u2_0(j) = 0.d0
+  end do
+
+  ! Add damping function to explicit R-K
+  do k = 0, twoNkz
+    do i = 0, Nxp - 1 ! Nkx
+      if ((i /= 0) .or. (k /= 0)) then
+        do j = jstart, jend
+          cf1(i, k, j) = cf1(i, k, j) - sponge_sigma(j) * (cu1(i, k, j) - 0.d0)
+          cf3(i, k, j) = cf3(i, k, j) - sponge_sigma(j) * (cu3(i, k, j) - 0.d0)
+        end do
+        do j = 1, Nyp
+          cf2(i, k, j) = cf2(i, k, j) - &
+                        0.5 * (sponge_sigma(j) + sponge_sigma(j + 1)) * (cu2(i, k, j) - 0.d0)
+        end do
+      end if
+    end do
+  end do
+  ! Damp mean flow
+  do j = jstart, jend
+    cf1(0, 0, j) = cf1(0, 0, j) - sponge_sigma(j) * (cu1(0, 0, j) - u1_0(j))
+    cf3(0, 0, j) = cf3(0, 0, j) - sponge_sigma(j) * (cu3(0, 0, j) - u3_0(j))
+  end do
+  do j = 1, Nyp
+    cf2(0, 0, j) = cf2(0, 0, j) - sponge_sigma(j) * (cu2(0, 0, j) - u2_0(j))
+  end do
+
+  return
 end
 
 

@@ -2167,6 +2167,4 @@ contains
 
   end
 
-
-  
 end module statistics
