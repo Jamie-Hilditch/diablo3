@@ -253,9 +253,6 @@ contains
       read (11, *) th_BC_Ymax(n), th_BC_Ymax_c1(n)
     end do
 
-    if (rank == 0) write (*, '("Ro Inverse = " ES26.18)') Ro_inv
-
-
     ! Compensate no-slip BC in the GS flow direction due to dTHdx
     !   AND also define dTHdx & dTHdz
     if (IC_Type == 4 .or. IC_Type == 5) then ! Infinite Front
