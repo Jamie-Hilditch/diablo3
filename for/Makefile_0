@@ -42,8 +42,7 @@ endif
 # Parallel HDF5 compiler wrapper
 COMPILER = h5pfc
 
-SOURCES = parameters.o domain.o fft.o flow.o boundary.o phdf5.o ics.o \
-			les.o statistics.o advance.o control.o 
+SOURCES = parameters.o domain.o fft.o flow.o boundary.o phdf5.o ics.o les.o statistics.o advance.o control.o 
 
 diablo: diablo.f90 $(SOURCES)
 	$(COMPILER) $(FCFLAGS) $^ -o $@ $(LDFLAGS)
@@ -70,8 +69,7 @@ les.o: les.f90 parameters.o domain.o fft.o flow.o phdf5.o boundary.o
 
 statistics.o: statistics.f90 parameters.o domain.o fft.o flow.o boundary.o phdf5.o
 
-advance.o: advance.f90 parameters.o domain.o fft.o flow.o boundary.o les.o \
-				channel.f90 forcing.f90 
+advance.o: advance.f90 parameters.o domain.o fft.o flow.o boundary.o les.o channel.f90 forcing.f90
 
 control.o: control.f90 parameters.o domain.o flow.o phdf5.o statistics.o
 
