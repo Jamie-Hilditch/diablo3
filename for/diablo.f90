@@ -53,13 +53,13 @@ program diablo
   use phdf5
 
 
-  integer n
-  logical flag
+  integer :: n
+  logical :: flag
 
   call read_inputs
   call set_parameters
-  call init_mpi ! initialise mpi variables
-
+  call init_mpi 
+  
   if (rank == 0) then
     write (*, *)
     write (*, *) '             ****** WELCOME TO DIABLO ******'
@@ -76,6 +76,7 @@ program diablo
 
   call init_flow
   call set_flow
+  call pre_first_step(compute_pressure)
 
   call save_stats(save_movie_dt/=0,.false.)
   if (use_LES) call save_stats_LES_OOL(.true.)

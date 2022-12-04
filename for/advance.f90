@@ -1,18 +1,44 @@
 ! advance a timestep
 module advance 
-    use parameters
-    use domain 
-    use flow 
-    use fft
-    use boundary
-    use tools 
-    implicit none 
+  use parameters
+  use domain 
+  use flow 
+  use fft
+  use boundary
+  use tools 
+  implicit none 
 
 contains 
 
-    include 'channel.f90'
-    include 'forcing.f90'
-    include 'les.f90'
+  include 'channel.f90'
+  include 'forcing.f90'
+  include 'les.f90'
+
+  !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+  subroutine pre_first_step(compute_pressure)
+    !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+    ! This subroutine ensures the initial velocity is divergence free,
+    ! sets the boundary conditions, ghost cells and if necesary computes 
+    ! the pressure
+    logical, intent(in) :: compute_pressure 
+
+    ! Apply Boundary conditions to velocity field
+    call apply_BC_vel_mpi_post
+    call ghost_chan_mpi
+
+
+    ! Remove the divergence of the velocity field
+    call rem_div_chan
+    call ghost_chan_mpi
+
+    ! Get the pressure from the poisson equation
+    if (compute_pressure) then
+      call poisson_p_chan
+      ! Fix for the pressure
+      call ghost_chan_mpi
+    end if
+
+  end
 
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   subroutine courant

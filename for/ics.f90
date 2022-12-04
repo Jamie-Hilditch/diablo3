@@ -4,9 +4,7 @@ module ics
     use domain 
     use fft
     use flow
-    use boundary
     use phdf5
-    use advance, only: rem_div_chan, poisson_p_chan
     implicit none
     save 
 
@@ -19,7 +17,7 @@ contains
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   subroutine set_flow 
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
-
+    integer :: n
     ! Initialize values for reading of scalars
     num_read_th = 0
     do n = 1, N_th
@@ -46,23 +44,6 @@ contains
         write (*, '("Starting at time step ", I10)') time_step
 
     end if 
-
-    ! Apply Boundary conditions to velocity field
-    call apply_BC_vel_mpi_post
-    call ghost_chan_mpi
-
-
-    ! Remove the divergence of the velocity field
-    call rem_div_chan
-    call ghost_chan_mpi
-
-    ! Get the pressure from the poisson equation
-    if (compute_pressure) then
-      call poisson_p_chan
-      ! Fix for the pressure
-      call ghost_chan_mpi
-    end if
-
   
     return
   end
