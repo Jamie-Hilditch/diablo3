@@ -1,3 +1,5 @@
+! defines the grids
+! setup mpi
 module domain
   use parameters
   use hdf5

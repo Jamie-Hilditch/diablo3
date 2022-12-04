@@ -1,10 +1,19 @@
 module tools
-  use domain
   use parameters
+  use domain
+  use flow
   implicit none
   save
 
+  real(rkind) :: start_wall_time, previous_wall_time, end_wall_time
+
 contains
+
+  !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+  subroutine init_tools(val)
+    !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+    call wall_time(start_wall_time)
+  end
 
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   subroutine get_minimum_mpi(val)
@@ -100,7 +109,7 @@ contains
     !
     implicit none
 
-    real(kind(0.d0)) wt
+    real(kind(0.d0)), intent(out) :: wt
     integer val(8), i, shift, day
 
     integer mon(12, 2)
@@ -313,10 +322,5 @@ contains
     end do
 
   end subroutine
-
-
-
-
-
 
 end module tools

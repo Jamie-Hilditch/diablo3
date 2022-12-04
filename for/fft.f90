@@ -52,6 +52,7 @@ module fft
   ! This has the effect of doing the required dealiasing.
   !
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+  use parameters
   use domain
   use iso_c_binding
   implicit none

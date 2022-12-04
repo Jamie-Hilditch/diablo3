@@ -43,10 +43,15 @@
 
 !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
 program diablo
-  use domain
   use parameters
+  use domain
   use flow
   use tools
+  use ics
+  use advance
+  use diagnostics
+  use phdf5
+
 
   integer n
   logical flag
@@ -70,9 +75,20 @@ program diablo
   end if
 
   call init_flow
+  call set_flow
+
+  call save_stats(save_movie_dt/=0,.false.)
+  if (use_LES) call save_stats_LES_OOL(.true.)
 
   ! Initialize start_wall_time for run timing
   call wall_time(start_wall_time)
+  previous_wall_time = start_wall_time
+
+  if (rank == 0) then
+    write (*, *)
+    write (*, *) '             ****** Done Initialising ******'
+    write (*, *)
+  end if
 
   do
     time_step = time_step + 1
