@@ -42,7 +42,7 @@ endif
 # Parallel HDF5 compiler wrapper
 COMPILER = h5pfc
 
-SOURCES = parameters.o domain.o fft.o flow.o phdf5.o ics.o boundary.o \ 
+SOURCES = parameters.o domain.o fft.o flow.o phdf5.o ics.o boundary.o \
 			advance.o control.o statistics.o
 
 diablo: diablo.f90 $(SOURCES)
