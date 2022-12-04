@@ -5,13 +5,13 @@ module advance
   use flow 
   use fft
   use boundary
+  use les
   implicit none 
 
 contains 
 
   include 'channel.f90'
   include 'forcing.f90'
-  include 'les.f90'
 
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   subroutine pre_first_step(compute_pressure)
@@ -35,6 +35,10 @@ contains
       call poisson_p_chan
       ! Fix for the pressure
       call ghost_chan_mpi
+    end if
+
+    if (variable_dt) then
+      call courant
     end if
 
   end
@@ -165,7 +169,7 @@ contains
         call filter_chan(n)
       end if
     end do
-    
+
   end
 
 end module advance

@@ -1,5 +1,5 @@
 ! routines for setting boundary conditions and ghost cells
-! these routines are used by both advance and diagnostics
+! these routines are used by the advance, les, and statistics modules
 module boundary 
     use parameters
     use domain
