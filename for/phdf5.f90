@@ -8,7 +8,6 @@ module phdf5
   use flow
   use hdf5
   implicit none
-  save
 
 contains
   
@@ -33,16 +32,17 @@ contains
     call WriteHDF5(fname, save_pressure)
 
     return
-  end
+  end subroutine write_flow
 
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   subroutine WriteHDF5_real(fname, gname, Diag)
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
     ! Writes a single real scalar to the specified file
-    use hdf5
 
-    character(len=12) fname
-    character(len=20) :: gname, dname
+    character(len=12), intent(in) :: fname
+    character(len=20), intent(in) :: gname
+    real(rkind), intent(in) :: Diag
+    character(len=20) :: dname
 
     ! Identifiers
     integer(hid_t) :: file_id, dset_id
@@ -60,7 +60,7 @@ contains
     integer(hsize_t), dimension(1)       :: adims
     integer(hid_t)                      :: dspace_id, aid, tspace
 
-    real(rkind) Diag
+    
     integer nsamp
     logical flage
 
@@ -145,13 +145,13 @@ contains
       call h5close_f(Error)
 
       ! End if RANK=0
-    end if
+    end if 
 
     ! Sync the cores as a precaution (probably not necessary)
     call mpi_barrier(mpi_comm_world, ierror)
 
     return
-  end
+  end subroutine WriteHDF5_real
 
 
 
@@ -161,7 +161,6 @@ contains
   subroutine WriteStatH5_Y(fname, gname, Diag)
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
     ! Writes a vector of values in Y (Vertical)
-    use hdf5
 
     character(len=12) fname
 
@@ -1451,10 +1450,6 @@ contains
     call h5gclose_f(gid, Error)
     call h5fclose_f(file_id, Error)
     call h5close_f(Error)
-
-    if (variable_dt) then
-      call courant
-    end if
 
     ! Convert to physical space
     call fft_xz_to_fourier(u1, cu1)
