@@ -51,14 +51,17 @@ program diablo
   integer n
   logical flag
 
+  
+
+  call read_input ! read inputs from input.dat or input.toml
+  call init_mpi ! initialise mpi variables
+
   if (rank == 0) then
     write (*, *)
     write (*, *) '             ****** WELCOME TO DIABLO ******'
     write (*, *)
+    call log_input_parameters
   end if
-
-  call read_input ! read inputs from input.dat or input.toml
-  call init_mpi ! initialise mpi variables
 
   ! Initialize case-specific packages
   if (num_per_dir == 3) then

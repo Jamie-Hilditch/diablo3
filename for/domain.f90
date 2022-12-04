@@ -137,7 +137,7 @@ contains
     if (rank == 0) &
       write (*, '("MPI Initialised with ", I10, " processors")') Nprocs
     call mpi_barrier(mpi_comm_world, ierror)
-    if (verbosity > 2 .and. rank == 0) &
+    if (verbosity > 3 .and. rank == 0) &
       write (*, '("Rank, rankZ, rankY: " 3I10)') rank, rankY, rankZ
 
 

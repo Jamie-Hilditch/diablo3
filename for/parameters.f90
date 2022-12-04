@@ -126,26 +126,25 @@ contains
 
 
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
-  subroutine log_parameters
+  subroutine log_input_parameters
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+    ! write out the input parameters
+    ! should only be called by the rank 0 process
 
     integer n  
-  
-    ! log parameters
-    if (rank == 0) then
-      write (*, '("Flavor: ", A35)') flavor
-      write (*, '("Nx = ", I10)') Nx
-      write (*, '("Ny = ", I10)') Ny
-      write (*, '("Nz = ", I10)') Nz
-      do n = 1, N_th
-        write (*, '("Scalar Number: ", I2)') n
-        write (*, '("  Richardson number = ", ES12.5)') Ri(n)
-        write (*, '("  Prandtl number    = ", ES12.5)') Pr(n)
-      end do
-      write (*, '("Use LES: " L1)') use_LES
-      write (*, '("Nu   = ", ES12.5)') nu
-      write (*, '("Beta = ", ES12.5)') beta
-    end if
+    
+    write (*, '("Flavor: ", A35)') flavor
+    write (*, '("Nx = ", I10)') Nx
+    write (*, '("Ny = ", I10)') Ny
+    write (*, '("Nz = ", I10)') Nz
+    do n = 1, N_th
+      write (*, '("Scalar Number: ", I2)') n
+      write (*, '("  Richardson number = ", ES12.5)') Ri(n)
+      write (*, '("  Prandtl number    = ", ES12.5)') Pr(n)
+    end do
+    write (*, '("Use LES: " L1)') use_LES
+    write (*, '("Nu   = ", ES12.5)') nu
+    write (*, '("Beta = ", ES12.5)') beta
 
   end
 
