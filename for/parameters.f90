@@ -36,8 +36,8 @@ module parameters
   real(rkind) :: nu_v_scale
   ! physical
   real(rkind) :: Lx, Ly, Lz
-  real(rkind) :: nu ! 1/Re
-  real(rkind) :: Ro_inv ! 1/Ro
+  real(rkind) :: Re, nu 
+  real(rkind) :: Ro, Ro_inv 
   real(rkind) :: delta
   real(rkind) :: grav_x, grav_y, grav_z
   ! timestepping
@@ -68,7 +68,6 @@ module parameters
   real(rkind) :: u_BC_Xmin_c1, v_BC_Xmin_c1, w_BC_Xmin_c1
   real(rkind) :: u_BC_Ymin_c1, v_BC_Ymin_c1, w_BC_Ymin_c1
   real(rkind) :: u_BC_Zmin_c1, v_BC_Zmin_c1, w_BC_Zmin_c1
-  real(rkind) :: th_BC_Xmin_c1(1:N_th), th_BC_Ymin_c1(1:N_th), th_BC_Zmin_c1(1:N_th)
   real(rkind) :: u_BC_Xmax_c1, v_BC_Xmax_c1, w_BC_Xmax_c1
   real(rkind) :: u_BC_Ymax_c1, v_BC_Ymax_c1, w_BC_Ymax_c1
   real(rkind) :: u_BC_Zmax_c1, v_BC_Zmax_c1, w_BC_Zmax_c1
@@ -93,8 +92,6 @@ contains
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   subroutine read_inputs
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
-
-    real(rkind) :: Re, Ro
 
     ! read in input parameters
 #ifdef TOML_INPUT
