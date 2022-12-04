@@ -1,23 +1,22 @@
 # input.toml
-# inputs for diablo. Note that the grid sizes are defined in grid_def.all 
-# so that they are known at compile time
+# inputs for diablo. 
+# Note that the grid sizes and number of scalars are defined at compile time
 VERSION = "3.4"
 [SCHEME]
 FLAVOUR = "Front"
-TIME_AD_METH = 1
-NUM_PER_DIR = 2 # (only channel geometry implemented)
-USE_MPI = true  # set in makefile (serial execution depreciated)
-USE_LES = true # set in makefile
+USE_LES = true 
+LES_MODEL_TYPE = 5
+BETA = 1.0 # Horizontal viscosity laplacian exponent
+NU_V_SCALE = 1.0 # Vertical viscosity scale factor   NU_V=1/RE*NU_V_SCALE
 [PHYSICAL]
 LX = 1600.0
 LY = 100.0
 LZ = 1.0
-RE = 2.0e6
-BETA = 1.0 # Horizontal viscosity laplacian exponent
-NU_V_SCALE = 1.0 # Vertical viscosity scale factor   NU_V=1/RE*NU_V_SCALE
+RE = 2.0e6 # Reynolds number
+RO = 1.0 # Rossby number (1/f)
+DELTA = 300.0 # aspect ratio
+GRAV = [0.0, 0.0, 1.0] # vertical (anti-gravity) unit vector
 [TIMESTEPPING]
-CREATE_NEW_FLOW = true
-RESET_TIME = false
 WALL_TIME = 40_000 # (s)
 TIME_LIMIT = 15_000
 DELTA_T = 1.0e-5
@@ -30,6 +29,32 @@ SAVE_FLOW_DT = 15_000
 SAVE_STATS_DT = 2.5
 SAVE_MOVIE_DT = 20.0
 MOVIE = [800.0, 0.0, 0.95] # X,Y,Z
+[INITIAL_CONDITIONS]
+CREATE_NEW_FLOW = true
+RESET_TIME = false
+IC_TYPE = 7
+KICK = 1.0e-5
+PHYSICAL_NOISE = true
+[FORCING]
+F_TYPE = 3
+UBULK0 = 0.0
+PX0 = 0.0
+OMEGA0 = 0.0
+AMP_OMEGA0 = 0.0
+FORCE_START = 0.0
+[VELOCITY_BCS] # 0 = Dirichlet, 1 = Neumann
+U_BC_ZMIN = 0
+U_BC_ZMIN_C1 = 0.0
+V_BC_ZMIN = 0
+V_BC_ZMIN_C1 = 0.0
+W_BC_ZMIN = 0
+W_BC_ZMIN_C1 = 0.0
+U_BC_ZMAX = 1
+U_BC_ZMAX_C1 = 0.0
+V_BC_ZMAX = 1
+V_BC_ZMAX_C1 = 0.0
+W_BC_ZMAX = 0
+W_BC_ZMAX_C1 = 0.0
 # Scalar parameters - double brackets creates an array of tables
 # repeat (with same name [[SCALARS]]) for each scalar
 [[SCALARS]]
@@ -38,9 +63,17 @@ FILTER_TH = false
 FILTER_INT = 10
 RI = 0.0 
 PR = 1.0
+TH_BC_ZMIN = 1
+TH_BC_ZMIN_C1 = 0.0
+TH_BC_ZMAX = 1
+TH_BC_ZMAX_C1 = 0.0
 # [[SCALARS]]
 # CREATE_FLOW_TH = true 
 # FILTER_TH = false 
 # FILTER_INT = 10
 # RI = 0.0 
 # PR = 1.0
+# TH_BC_ZMIN = 1
+# TH_BC_ZMIN_C1 = 0.0
+# TH_BC_ZMAX = 1
+# TH_BC_ZMAX_C1 = 0.0

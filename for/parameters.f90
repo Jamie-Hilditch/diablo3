@@ -1,8 +1,8 @@
 ! Define parameters used throughout diablo
 ! Contains subroutines to read input files and set parameters
+! Option to use toml-f to read in the inputs as a toml file
 
 module parameters
-  ! tomlf library optional
 #ifdef TOML_INPUT 
   use tomlf, only: toml_table, toml_parse, toml_error, get_value  
 #endif
@@ -17,86 +17,54 @@ module parameters
   integer, parameter :: double_kind = kind(0.d0)
   integer, parameter :: rkind = double_kind
 
-  ! Details of the Computational Domain
+  ! Grid
   ! (We hardwire these into the code so that the compiler may perform
   !  optimizations based on the grid size at compile time).
   integer :: Nx, Ny, Nz, N_th
   include 'grid_def'
 
-  real(rkind) :: time
-  integer :: time_step, rk_step
-  real(rkind) :: save_flow_time, save_stats_time, save_movie_time
-
-  integer :: previous_time_step
-
-  
-
-  ! Parameters defined in input.dat
+  ! Parameters set in inputs
   real :: version
-  character(len=35)   flavor
-  logical             use_mpi
-  logical             use_LES
-  real(rkind)         nu
-  real(rkind)         nu_v_scale
-  real(rkind)         beta
-  real(rkind)         Lx, Ly, Lz
-  real(rkind)         delta_t, dt, delta_t_next_event, kick, ubulk0, px0
-
-  logical             create_new_flow
-  real(rkind)         wall_time_limit, time_limit
-  real(rkind)         start_wall_time, previous_wall_time, end_wall_time
-
-  logical             variable_dt, first_time
-  logical             reset_time
-  real(rkind)         CFL
-  integer             update_dt
-
-  integer             verbosity
-  real(rkind)         save_flow_dt, save_stats_dt
-  real(rkind)         save_movie_dt
-  real(rkind)         XcMovie, YcMovie, ZcMovie
-
-  logical             create_new_th(1:N_th)
-  real(rkind)         Ri(1:N_th), Pr(1:N_th)
-  logical             filter_th(1:N_th)
-  integer             filter_int(1:N_th)
-
-  integer     num_read_th
-  integer     read_th_index(1:N_th)
-  real(rkind) dTHdX(1:N_th), dTHdZ(1:N_th)
-  real(rkind) dWdX ! Background vorticity
-
-
-  integer     IC_type, f_type
-  logical     physical_noise
-  logical     homogeneousX
-
-
-  ! Periodic
-  real(rkind) ek0, ek, epsilon_target
-  logical     background_grad(1:N_th)
-
-  ! Rotating Flows
-  real(rkind) Ro_inv, grav_x, grav_y, grav_z, delta
-
-  ! Parameters for oscillatory forcing
-  real(rkind) omega0, amp_omega0, force_start
-  real(rkind) w_BC_Ymax_c1_transient
-
-
-  ! Numerical parameters
-  integer num_per_dir
-  integer  time_ad_meth
-  integer les_model_type
-
-  ! BCs & Values
-  integer :: u_BC_Xmin, v_BC_Xmin, w_BC_Xmin, th_BC_Xmin(1:N_th)
-  integer :: u_BC_Xmax, v_BC_Xmax, w_BC_Xmax, th_BC_Xmax(1:N_th)
-  integer :: u_BC_Ymin, v_BC_Ymin, w_BC_Ymin, th_BC_Ymin(1:N_th)
-  integer :: u_BC_Ymax, v_BC_Ymax, w_BC_Ymax, th_BC_Ymax(1:N_th)
-  integer :: u_BC_Zmin, v_BC_Zmin, w_BC_Zmin, th_BC_Zmin(1:N_th)
-  integer :: u_BC_Zmax, v_BC_Zmax, w_BC_Zmax, th_BC_Zmax(1:N_th)
-
+  ! scheme
+  character(len=35) :: flavor
+  logical :: use_mpi ! must be true
+  logical :: use_LES
+  integer :: num_per_dir ! must be 2
+  integer :: time_ad_meth ! must be 1
+  integer :: les_model_type
+  real(rkind) :: beta
+  real(rkind) :: nu_v_scale
+  ! physical
+  real(rkind) :: Lx, Ly, Lz
+  real(rkind) :: nu ! 1/Re
+  real(rkind) :: Ro_inv ! 1/Ro
+  real(rkind) :: delta
+  real(rkind) :: grav_x, grav_y, grav_z
+  ! timestepping
+  real(rkind) :: wall_time_limit, time_limit
+  real(rkind) :: delta_t
+  logical :: variable_dt
+  real(rkind) :: CFL
+  integer :: update_dt
+  ! output
+  integer :: verbosity
+  real(rkind) :: save_flow_dt, save_stats_dt, save_movie_dt
+  real(rkind) :: XcMovie, YcMovie, ZcMovie
+  ! initial conditions 
+  logical :: create_new_flow, reset_time
+  integer :: IC_type
+  real(rkind) :: kick 
+  logical :: physical_noise
+  ! forcing
+  integer :: f_type
+  real(rkind) :: ubulk0, px0, omega0, amp_omega0, force_start
+  ! velocity bcs
+  integer :: u_BC_Xmin, v_BC_Xmin, w_BC_Xmin
+  integer :: u_BC_Xmax, v_BC_Xmax, w_BC_Xmax
+  integer :: u_BC_Ymin, v_BC_Ymin, w_BC_Ymin
+  integer :: u_BC_Ymax, v_BC_Ymax, w_BC_Ymax
+  integer :: u_BC_Zmin, v_BC_Zmin, w_BC_Zmin
+  integer :: u_BC_Zmax, v_BC_Zmax, w_BC_Zmax
   real(rkind) :: u_BC_Xmin_c1, v_BC_Xmin_c1, w_BC_Xmin_c1
   real(rkind) :: u_BC_Ymin_c1, v_BC_Ymin_c1, w_BC_Ymin_c1
   real(rkind) :: u_BC_Zmin_c1, v_BC_Zmin_c1, w_BC_Zmin_c1
@@ -104,15 +72,30 @@ module parameters
   real(rkind) :: u_BC_Xmax_c1, v_BC_Xmax_c1, w_BC_Xmax_c1
   real(rkind) :: u_BC_Ymax_c1, v_BC_Ymax_c1, w_BC_Ymax_c1
   real(rkind) :: u_BC_Zmax_c1, v_BC_Zmax_c1, w_BC_Zmax_c1
+  ! scalars 
+  logical :: create_new_th(1:N_th)
+  logical :: filter_th(1:N_th)
+  integer :: filter_int(1:N_th)
+  real(rkind) :: Ri(1:N_th), Pr(1:N_th)
+  integer :: th_BC_Xmin(1:N_th), th_BC_Ymin(1:N_th), th_BC_Zmin(1:N_th)
+  integer :: th_BC_Xmax(1:N_th), th_BC_Zmax(1:N_th), th_BC_Ymax(1:N_th)
+  real(rkind) :: th_BC_Xmin_c1(1:N_th), th_BC_Ymin_c1(1:N_th), th_BC_Zmin_c1(1:N_th)
   real(rkind) :: th_BC_Xmax_c1(1:N_th), th_BC_Ymax_c1(1:N_th), th_BC_Zmax_c1(1:N_th)
 
+  ! parameters defined in set_parameters
+  logical :: homogeneousX
+  real(rkind) :: w_BC_Ymax_c1_transient
+  real(rkind) :: dTHdX(1:N_th), dTHdZ(1:N_th)
 
 contains
 
 
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
-  subroutine read_input
+  subroutine read_inputs
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+
+    real(rkind) :: Re, Ro
+
     ! read in input parameters
 #ifdef TOML_INPUT
     ! read parameters from input.toml
@@ -120,7 +103,11 @@ contains
 #else
     ! read in parameters from input.dat
     call read_input_dat
+    call read_input_chan
 #endif
+
+    nu = 1.d0 / Re
+    Ro_inv = 1.d0 / Ro
 
   end
 
@@ -153,7 +140,6 @@ contains
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
 
     integer n
-    real(rkind) Re
     
     open (11, file='input.dat', form='formatted', status='old')
 
@@ -172,11 +158,11 @@ contains
     if (use_mpi .eqv. .false.) stop 'Serial processing has been deprecated in diablo3.'
     read (11, *)
     read (11, *) Re, beta, Lx, Lz, Ly
-    nu = 1.d0 / Re
     read (11, *)
     read (11, *) nu_v_scale
     read (11, *)
     read (11, *) num_per_dir, create_new_flow
+    if (num_per_dir /= 2) stop 'DIABLO only supports channel geometry (num_per_dim = 2)'
     read (11, *)
     read (11, *) wall_time_limit, time_limit, delta_t, reset_time, &
       variable_dt, CFL, update_dt
@@ -200,7 +186,7 @@ contains
 
     
     integer n
-    real(rkind) ro
+    
 
     ! Read in input parameters specific for channel flow case
     open (11, file='input_chan.dat', form='formatted', status='old')
@@ -221,13 +207,10 @@ contains
     read (11, *)
     read (11, *) IC_type, kick, physical_noise
     read (11, *)
-    read (11, *) ro
-    Ro_inv = 1.d0 / ro
+    read (11, *) Ro
     read (11, *)
     read (11, *) delta
     read (11, *)
-    !read (11, *) dWdX ! Background vorticity
-    !read (11, *)
     read (11, *) grav_x, grav_z, grav_y
     read (11, *)
     read (11, *) f_type, ubulk0, px0, omega0, amp_omega0, force_start
@@ -252,6 +235,16 @@ contains
       read (11, *)
       read (11, *) th_BC_Ymax(n), th_BC_Ymax_c1(n)
     end do
+
+    
+
+
+    return
+  end
+
+  !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+  subroutine set_parameters
+    !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
 
     ! Compensate no-slip BC in the GS flow direction due to dTHdx
     !   AND also define dTHdx & dTHdz
@@ -286,21 +279,13 @@ contains
     else ! Infinite, homogeneous front (or other IC...)
       homogeneousX = .true. ! Assume the x-direction is a valid averaging dimension
     endif
-
-
-    return
   end
 
-  ! only define toml input options if using the tomlf library
+  ! only define toml input option if using the tomlf library
 #ifdef TOML_INPUT 
 
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   subroutine read_input_toml
-    !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
-  end
-
-  !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
-  subroutine read_input_chan_toml
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   end
 

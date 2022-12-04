@@ -82,13 +82,15 @@ module flow
 
   real(rkind) epsilon(0:Nyp+1), epsilon_m(0:Nyp+1)
 
-
-
-
-
-
-
-
+  ! timestepping
+  real(rkind) :: time
+  integer :: time_step, rk_step
+  real(rkind) :: save_flow_time, save_stats_time, save_movie_time
+  integer :: previous_time_step
+  real(rkind)         dt, delta_t_next_event, 
+  real(rkind)         start_wall_time, previous_wall_time, end_wall_time
+  integer     num_read_th
+  integer     read_th_index(1:N_th)
 
 contains
 

@@ -51,11 +51,8 @@ program diablo
   integer n
   logical flag
 
-  
-
-  call read_input ! read inputs from input.dat or input.toml
-  call read_input_chan
-
+  call read_inputs
+  call set_parameters
   call init_mpi ! initialise mpi variables
 
   if (rank == 0) then
@@ -65,27 +62,17 @@ program diablo
     call log_input_parameters
   end if
 
-  ! Initialize case-specific packages
-  if (num_per_dir == 3) then
-    stop 'Error: Triply-Periodic Box has been deprecated!'
-  elseif (num_per_dir == 2) then
-    call create_grid_chan
-    call init_chan_mpi
-    if (save_movie_dt /= 0) then
-      call init_chan_movie
-    end if
-  elseif (num_per_dir == 1) then
-    stop 'Error: Duct not implemented!'
-  elseif (num_per_dir == 0) then
-    stop 'Error: Cavity not implemented!'
+  ! Initialize channel geometry
+  call create_grid_chan
+  call init_chan_mpi
+  if (save_movie_dt /= 0) then
+    call init_chan_movie
   end if
 
   call init_flow
 
   ! Initialize start_wall_time for run timing
   call wall_time(start_wall_time)
-
-  first_time = .true.
 
   do
     time_step = time_step + 1
@@ -98,7 +85,6 @@ program diablo
       if (time_ad_meth == 2) call rk_chan_2
     end do
     time = time + delta_t
-    first_time = .false.
 
     ! Optionally apply a filter to the scalar field
     do n = 1, N_th
