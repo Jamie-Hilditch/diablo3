@@ -12,23 +12,23 @@ subroutine user_rhs_chan_physical
   ! in physical space.
   ! S1 is available as a working variable
 
-   ! integer i, j, k, n
-   !
-   ! real(rkind) alpha
-   !
-   ! call fft_xz_to_physical(cf3, f3)
-   !
-   ! do j = 1, Nyp
-   !   do k = 0, Nzp - 1
-   !     do i = 0, Nxm1
-   !       f3(i, k, j) = f3(i, k, j) + 0.001 * exp(-((gx(i) - Lx/2)**2 + (gyf(j) - Ly/2)**2)/(2.d0*0.01**2))*sin(0.7*time);
-   !     end do
-   !   end do
-   ! end do
-   !
-   ! call fft_xz_to_fourier(f3, cf3)
+  ! integer i, j, k, n
+  !
+  ! real(rkind) alpha
+  !
+  ! call fft_xz_to_physical(cf3, f3)
+  !
+  ! do j = 1, Nyp
+  !   do k = 0, Nzp - 1
+  !     do i = 0, Nxm1
+  !       f3(i, k, j) = f3(i, k, j) + 0.001 * exp(-((gx(i) - Lx/2)**2 + (gyf(j) - Ly/2)**2)/(2.d0*0.01**2))*sin(0.7*time);
+  !     end do
+  !   end do
+  ! end do
+  !
+  ! call fft_xz_to_fourier(f3, cf3)
 
-   ! call slip_vel
+  ! call slip_vel
 
   return
 end
