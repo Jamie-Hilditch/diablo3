@@ -50,6 +50,7 @@ program diablo
   use advance
   use control
   use statistics
+  use les
   implicit none 
 
   integer :: n

@@ -2168,54 +2168,5 @@ contains
   end
 
 
-  !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
-  subroutine save_stats_LES_OOL(blank)
-    !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
-
-    integer n
-    character(len=35) fname
-    character(len=20) gname
-    logical blank
-    real(rkind) :: Diag(1:Nyp)
-
-
-    if (blank) then
-      fname = 'mean.h5'
-
-      if (rankZ == 0) then
-        Diag = 0.d0
-        gname = 'nu_sgs'
-        call WriteStatH5_Y(fname, gname, Diag)
-
-        gname = 'eps_sgs1'
-        call WriteStatH5_Y(fname, gname, Diag)
-
-        Diag = 0.d0
-        gname = 'kappa_sgs'
-        call WriteStatH5_Y(fname, gname, Diag)
-
-      end if
-    else
-      ! Needed to write out LES Statistics without timestepping...
-      ! DON'T run this except for when stopping the simulation!
-
-      rk_step = 1
-      flag_save_LES = .true.
-
-      call les_chan
-      call les_chan_th
-
-      call fft_xz_to_fourier(u1, cu1)
-      call fft_xz_to_fourier(u2, cu2)
-      call fft_xz_to_fourier(u3, cu3)
-
-      do n = 1, N_th
-        call fft_xz_to_fourier(th(:, :, :, n), cth(:, :, :, n))
-      end do
-
-    end if
-
-    return
-
-  end
+  
 end module statistics
