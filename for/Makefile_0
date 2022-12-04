@@ -27,7 +27,7 @@ else
   ifeq ($(COMPILER),ifort)
     FCFLAGS += -O0 -fpp -g check all traceback 
   else ifeq ($(COMPILER),gfortran)
-    FCFLAGS += -O0 -cpp -g -fcheck=all -fbacktrace
+    FCFLAGS += -Og -cpp -g -fcheck=all -fbacktrace
   endif
 endif
   
