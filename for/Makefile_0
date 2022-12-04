@@ -63,6 +63,8 @@ tools.o: tools.f90 parameters.o domain.o flow.o
 
 phdf5.o: phdf5.f90 parameters.o domain.o flow.o tools.o
 
+ics.o: ics.f90 parameters.o domain.o fft.o flow.o phdf5.o
+
 boundary.o: boundary.f90 parameters.o domain.o fft.o flow.o
 
 diagnostics.o: diagnostics.f90 parameters.o domain.o fft.o flow.o boundary.o
@@ -70,7 +72,7 @@ diagnostics.o: diagnostics.f90 parameters.o domain.o fft.o flow.o boundary.o
 advance.o: advance.f90 parameters.o domain.o fft.o flow.o boundary.o tools.o \
 				channel.f90 forcing.f90 les.f90 
 
-ics.o: ics.f90 parameters.o domain.o fft.o flow.o boundary.o phdf5.o advance.o
+
 
 
 .PHONY: clean

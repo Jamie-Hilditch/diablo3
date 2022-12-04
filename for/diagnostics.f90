@@ -1,4 +1,4 @@
-module diagostics 
+module diagnostics 
   use parameters 
   use domain 
   use fft
