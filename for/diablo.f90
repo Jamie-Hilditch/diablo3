@@ -79,7 +79,6 @@ program diablo
     stop 'Error: Cavity not implemented!'
   end if
 
-  call log_parameters
   call init_flow
 
   ! Initialize start_wall_time for run timing

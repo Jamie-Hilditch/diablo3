@@ -304,7 +304,8 @@ contains
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   end
 
-#endif ! TOML_INPUT
+#endif 
+! TOML_INPUT
 
 
 end module parameters
