@@ -3,27 +3,23 @@
 !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
 module phdf5
   use parameters 
-  use domain 
+  use domain
+  use fft 
   use flow
-  use tools 
   use hdf5
   implicit none
   save
 
 contains
+  
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
-  subroutine save_flow(final)
+  subroutine write_flow(final)
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
 
+    logical, intent(in) :: final
     character(len=55) fname
     integer i, j, k, n
-    logical final, save_pressure
-    real(rkind) wall_begin
-
-    call wall_time(wall_begin)
-
-    if (rank == 0) &
-      write (*, '("Saving Output File")')
+    logical save_pressure
 
     save_pressure = .false.
     if (final) then
@@ -33,17 +29,8 @@ contains
       write (fname,'(A4, I0.6, A3)') 'out.', time_step, '.h5'
     end if
 
-    if (num_per_dir /= 2) then
-      if (rank == 0) &
-        write (*, '("Saving to HDF5 only implemented for Channel.")')
-      stop
-    end if
     call mpi_barrier(mpi_comm_world, ierror)
     call WriteHDF5(fname, save_pressure)
-
-    call wall_time(end_wall_time)
-    if (rank == 0) &
-      write (*,'("Elapsed Wall Time to Save Flow: ", ES12.5)') (end_wall_time - wall_begin)
 
     return
   end
@@ -940,20 +927,6 @@ contains
 
   end subroutine WriteHDF5_ZYplane
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   ! Reading / Writing out Checkpoints & Cubes
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
@@ -1494,4 +1467,166 @@ contains
     end do
 
   end subroutine ReadHDF5
+
+  !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+  subroutine swapzy(in, out)
+    !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+
+    real(rkind) in(0:Nx + 1, 0:Nzp + 1, 0:Nyp + 1)
+    real(rkind) out(1:Nx, 1:Nyp, 1:Nzp)
+    integer x, z, y
+
+    out = 0.d0
+    do x = 0, Nx - 1
+      do y = 1, Nyp
+        do z = 0, Nzp - 1
+          out(x + 1, y, z + 1) = in(x, z, y)
+        end do
+      end do
+    end do
+
+  end subroutine
+
+  !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+  subroutine swapyz(in, out)
+    !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+
+    real(rkind) out(0:Nx + 1, 0:Nzp + 1, 0:Nyp + 1)
+    real(rkind) in(1:Nx, 1:Nyp, 1:Nzp)
+    integer x, z, y
+
+    out = 0.d0
+    do x = 0, Nx - 1
+      do y = 1, Nyp
+        do z = 0, Nzp - 1
+          out(x, z, y) = in(x + 1, y, z + 1)
+        end do
+      end do
+    end do
+
+  end subroutine
+
+
+  !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+  subroutine gf2g(var)
+    !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+
+    real(rkind) var(0:Nx + 1, 0:Nzp + 1, 0:Nyp + 1)
+    integer x, z, y
+    type(mpi_datatype) :: xzbox
+
+    ! Define new data type
+    call mpi_type_vector(Nzp, Nx, Nx + 2, mpi_double_precision, &
+                         xzbox, ierror)
+    call mpi_type_commit(xzbox, ierror)
+
+    if (rankY /= NprocY - 1) then
+      call mpi_recv(var(0, 0, Nyp + 1), 1, xzbox, rankY + 1, 101 + rankY, &
+                    mpi_comm_y, status, ierror)
+    else
+      do x = 0, Nx - 1
+        do z = 0, Nzp - 1
+          var(x, z, Nyp + 1) = var(x, z, Nyp)
+        end do
+      end do
+    end if
+
+    do x = 0, Nx - 1
+      do z = 0, Nzp - 1
+        do y = Nyp, 1, -1
+          var(x, z, y) = 2 * var(x, z, y) - var(x, z, y + 1)
+        end do
+      end do
+    end do
+
+    if (rankY /= 0) call mpi_send(var(0, 0, 2), 1, &
+                                    xzbox, rankY - 1, 100 + rankY, &
+                                    mpi_comm_y, ierror)
+
+    ! Impose the values at the boundary as prescribed in the
+    ! code in order to have zero mass flux
+    if (rankY == 0) var(:, :, 1) = -var(:, :, 2)
+    if (rankY == NprocY - 1) var(:, :, Nyp + 1) = -var(:, :, Nyp)
+
+  end subroutine
+
+
+  !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+  subroutine g2gf(var)
+    !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+
+    real(rkind) var(0:Nx + 1, 0:Nzp + 1, 0:Nyp + 1)
+    integer x, z, y
+
+    do x = 0, Nx - 1
+      do z = 0, Nzp - 1
+        if (rankY == 0) var(x, z, 1) = var(x, z, 2)
+        if (rankY == NprocY - 1) var(x, z, Nyp + 1) = var(x, z, Nyp)
+        do y = 1, Nyp
+          var(x, z, y) = 0.5 * (var(x, z, y) + var(x, z, y + 1))
+        end do
+      end do
+    end do
+
+  end subroutine
+
+  !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+  subroutine time_string(cdt)
+    !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+    !
+    ! Construct string in the format '19-DEC-2005 22:47:06'
+    !
+    implicit none
+
+    integer :: i
+
+    integer :: val(8)
+    character(len=20), intent(out) :: cdt
+    character(len=3) :: monc
+
+    call date_and_time(values=val)
+
+    if (val(2) == 1) then
+      monc = 'JAN'
+    else if (val(2) == 2) then
+      monc = 'FEB'
+    else if (val(2) == 3) then
+      monc = 'MAR'
+    else if (val(2) == 4) then
+      monc = 'APR'
+    else if (val(2) == 5) then
+      monc = 'MAY'
+    else if (val(2) == 6) then
+      monc = 'JUN'
+    else if (val(2) == 7) then
+      monc = 'JUL'
+    else if (val(2) == 8) then
+      monc = 'AUG'
+    else if (val(2) == 9) then
+      monc = 'SEP'
+    else if (val(2) == 10) then
+      monc = 'OCT'
+    else if (val(2) == 11) then
+      monc = 'NOV'
+    else if (val(2) == 12) then
+      monc = 'DEC'
+    else
+      monc = 'XXX'
+    end if
+
+    write (cdt, '(i2,a1,a3,a1,i4,a1,i2,a1,i2,a1,i2)') &
+      val(3), '-', monc, '-', val(1), ' ', val(5), ':', val(6), ':', val(7)
+    do i = 1, 2
+      if (cdt(i:i) == ' ') then
+        cdt(i:i) = '0'
+      end if
+    end do
+    do i = 13, 20
+      if (cdt(i:i) == ' ') then
+        cdt(i:i) = '0'
+      end if
+    end do
+
+  end subroutine time_string
+
 end module phdf5

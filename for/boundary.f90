@@ -1,5 +1,5 @@
 ! routines for setting boundary conditions and ghost cells
-! these routines are used for timestepping, setting initial conditions and output
+! these routines are used by both advance and diagnostics
 module boundary 
     use parameters
     use domain

@@ -46,20 +46,19 @@ program diablo
   use parameters
   use domain
   use flow
-  use tools
   use ics
   use advance
-  use diagnostics
-  use phdf5
-
-
+  use control
+  use statistics
+  implicit none 
+  
   integer :: n
   logical :: flag
 
   call read_inputs
   call set_parameters
   call init_mpi 
-  
+
   if (rank == 0) then
     write (*, *)
     write (*, *) '             ****** WELCOME TO DIABLO ******'
@@ -78,7 +77,7 @@ program diablo
   call set_flow
   call pre_first_step(compute_pressure)
 
-  call save_stats(save_movie_dt/=0,.false.)
+  call save_stats_chan(save_movie_dt/=0,.false.)
   if (use_LES) call save_stats_LES_OOL(.true.)
 
   ! Initialize start_wall_time for run timing
@@ -91,6 +90,7 @@ program diablo
     write (*, *)
   end if
 
+  ! main loop
   do
     time_step = time_step + 1
 
@@ -103,57 +103,24 @@ program diablo
     end do
     time = time + delta_t
 
-    ! Optionally apply a filter to the scalar field
-    do n = 1, N_th
-      if (filter_th(n) &
-          .and. (mod(time_step, filter_int(n)) == 0)) then
-        call filter_chan(n)
-      end if
-    end do
-
+    ! Apply filters to the scalar fields if on
+    call filter_scalars
+    
+    ! Check if we meet any stop conditions
     call end_run_mpi(flag)
-
 
     ! Save statistics to an output file
     if (time >= save_stats_time) then
-
-      flag_save_LES = .true.
-      if (time >= save_movie_time) then
-        call save_stats(.true.,.false.)
-        save_movie_time = save_stats_time + save_movie_dt - save_stats_dt*1.d-5 ! Increment from stats_time
-      else
-        call save_stats(.false.,.false.)
-      end if
-      if (flag .and. use_LES) then ! Won't get into the next RK to save LES
-        call save_stats_LES_OOL(.false.)
-      end if
-      save_stats_time = save_stats_time + save_stats_dt
-
-      ! Timing Diagnostics
-      call wall_time(end_wall_time)
-      if (rank == 0) then
-        write (*,'("Wall Seconds per Stats Output: ", ES15.3)') &
-                  (end_wall_time - previous_wall_time)
-        write (*,'("Wall Seconds per Iteration: ", ES18.3)') &
-                  (end_wall_time - previous_wall_time) / float(time_step - previous_time_step)
-        write (*,'("Wall Seconds per Simulation Time: ", ES12.3)') &
-                  (end_wall_time - previous_wall_time) / save_stats_dt
-
-        write (*, *)
-
-      end if
-      call wall_time(previous_wall_time)
-      previous_time_step = time_step
-
+      call save_stats
     end if
 
-    ! Save entire flow to a file (Only really a restart file if end.h5)
+    ! Save entire flow to a file 
     if (time >= save_flow_time) then
-      save_flow_time = save_flow_time + save_flow_dt
-      call save_flow(.false.)
+      save_flow(.false.)
     end if
 
-    if (flag) then ! We're done running
+    ! Check if we're done
+    if (flag) then 
       exit
     end if
 
@@ -166,7 +133,10 @@ program diablo
     write (*, '("Wall Seconds per Iteration: ", ES12.5)') (end_wall_time - start_wall_time) / time_step
   end if
 
+  ! create the end file
   call save_flow(.true.)
+
+  ! tidy up
   !call deallocate_all
   call mpi_finalize(ierror)
 

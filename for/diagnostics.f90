@@ -1,4 +1,4 @@
-module diagnostics 
+module statistics 
   use parameters 
   use domain 
   use fft
@@ -38,20 +38,7 @@ module diagnostics
 
 contains 
 
-  !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
-  subroutine save_stats(movie,final)
-    !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
-
-    logical movie, final
-    real(rkind) wall_begin
-
-    call wall_time(wall_begin)
-    call save_stats_chan(movie,final)
-    call wall_time(end_wall_time)
-    if (rank == 0) &
-      write (*,'("Elapsed Wall Time to Save Stats: ", ES13.3)') (end_wall_time - wall_begin)
-    return
-  end
+ 
 
 
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
@@ -2229,4 +2216,4 @@ contains
     return
 
   end
-end module diagnostics
+end module statistics

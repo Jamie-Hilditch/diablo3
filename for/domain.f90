@@ -529,6 +529,35 @@ contains
 
   end subroutine
 
+  !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+  subroutine get_minimum_mpi(val)
+    !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+
+    real(rkind) val, vmin
+
+    call mpi_allreduce(val, vmin, 1, mpi_double_precision, &
+                       mpi_min, mpi_comm_world, ierror)
+
+    val = vmin
+
+    return
+
+  end
+
+  !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+  subroutine get_maximum_mpi(val)
+    !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+
+    real(rkind) val, vmax
+
+    call mpi_allreduce(val, vmax, 1, mpi_double_precision, &
+                       mpi_max, mpi_comm_world, ierror)
+
+    val = vmax
+
+    return
+
+  end
 
 
 

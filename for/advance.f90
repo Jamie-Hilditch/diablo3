@@ -5,7 +5,6 @@ module advance
   use flow 
   use fft
   use boundary
-  use tools 
   implicit none 
 
 contains 
@@ -152,6 +151,21 @@ contains
     h_bar(3) = delta_t * (5.d0 / 15.d0)
 
     return
+  end
+
+  !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+  subroutine filter_scalars
+    !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+
+    integer :: n
+
+    do n = 1, N_th
+      if (filter_th(n) &
+          .and. (mod(time_step, filter_int(n)) == 0)) then
+        call filter_chan(n)
+      end if
+    end do
+    
   end
 
 end module advance
