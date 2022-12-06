@@ -1,11 +1,12 @@
+! subroutines and timing parameters for saving stats and ending run
+! called from the program main loop, defined here mostly for tidiness
 module control
   use parameters
   use domain
   use flow
   use phdf5 
-  use statistics
+  use statistics, only: save_stats_chan
   implicit none 
-  save
 
   real(rkind) :: start_wall_time, previous_wall_time, end_wall_time
 

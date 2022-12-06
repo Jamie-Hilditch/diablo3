@@ -5,7 +5,6 @@ module domain
   use hdf5
   use mpi_f08
   implicit none
-  save
 
   ! MPI parameters
   integer :: NprocY, NprocZ, Nprocs,  NprocShared

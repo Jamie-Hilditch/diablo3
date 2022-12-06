@@ -5,7 +5,6 @@ module flow
   use domain
   use fft
   implicit none
-  save
 
   ! RK
   real(rkind) :: h_bar(3), beta_bar(3), zeta_bar(3)

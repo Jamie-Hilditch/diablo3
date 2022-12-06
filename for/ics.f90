@@ -1,15 +1,15 @@
 ! set the initial conditions or read in from a file
 module ics 
-    use parameters 
-    use domain 
-    use fft
-    use flow
-    use phdf5
-    implicit none
+  use parameters 
+  use domain 
+  use fft
+  use flow
+  use phdf5
+  implicit none
 
-    integer :: num_read_th
-    integer :: read_th_index(1:N_th)
-    logical :: compute_pressure
+  integer :: num_read_th
+  integer :: read_th_index(1:N_th)
+  logical :: compute_pressure
 
 contains
 
@@ -267,12 +267,6 @@ contains
       end do
 
     end if
-
-
-    
-
-    ! Save various statistics to keep track of the initial condition
-    ! call save_stats_chan(.false.)
 
     return
   end

@@ -1,3 +1,4 @@
+! compute and write out statistics
 module statistics 
   use parameters 
   use domain 
@@ -7,7 +8,6 @@ module statistics
   use phdf5
   use les
   implicit none
-  save
 
   real(rkind), dimension(0:Nyp+1) :: urms, vrms, wrms, &
                                      ume,  vme,  wme,  &
@@ -40,9 +40,6 @@ module statistics
 
 contains 
 
- 
-
-
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   subroutine save_stats_chan(movie,final)
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
@@ -73,7 +70,7 @@ contains
     call ghost_chan_mpi_j0 ! Need the j = 0 boundary filled for les output
 
 
-    if (rank == 0) write (*, '("Time    = " ES12.5 "       dt = " ES12.5)') time, dt ! Note: dt is the physical / CFL-constrained time-step
+    if (rank == 0) write (*, '("  Time    = " ES12.5 "       dt = " ES12.5)') time, dt ! Note: dt is the physical / CFL-constrained time-step
 
     ! Store FF CUi in cr1(), and keep PP Ui in u1()
     do j = 0, Nyp + 1
@@ -712,10 +709,6 @@ contains
     return
   end
 
-
-
-
-
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   subroutine compute_averages(movie)
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
@@ -741,7 +734,7 @@ contains
     end if
 
     call integrate_y_var(ume, ubulk)
-    if (rank == 0) write (*,  '("U Bulk  = " ES26.18)') ubulk
+    if (rank == 0) write (*,  '("  U Bulk  = " ES26.18)') ubulk
 
     call mpi_bcast(ume, Nyp + 2, mpi_double_precision, 0, &
                   mpi_comm_z, ierror)
@@ -841,8 +834,6 @@ contains
     end if
 
   end
-
-
 
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   subroutine compute_TKE_diss(movie)
@@ -1135,8 +1126,6 @@ contains
     return
   end
 
-
-
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   subroutine compute_MKE_diss(movie)
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
@@ -1292,8 +1281,6 @@ contains
     return
   end
 
-
-
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   subroutine compute_TKE(movie)
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
@@ -1361,9 +1348,9 @@ contains
     call integrate_y_var(wrms, wrms_b)
     ! Write out the bulk RMS Velocity
     if (rank == 0) then
-      write (*,  '("<U_rms> = " ES26.18)') sqrt(urms_b)
-      write (*,  '("<V_rms> = " ES26.18)') sqrt(wrms_b)
-      write (*,  '("<W_rms> = " ES26.18)') sqrt(vrms_b)
+      write (*,  '("  <U_rms> = " ES26.18)') sqrt(urms_b)
+      write (*,  '("  <V_rms> = " ES26.18)') sqrt(wrms_b)
+      write (*,  '("  <W_rms> = " ES26.18)') sqrt(vrms_b)
     end if
 
     urms = sqrt(urms)
@@ -1402,9 +1389,6 @@ contains
 
 
   end
-
-
-
 
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   subroutine compute_TKE_Production(movie)
@@ -1561,9 +1545,6 @@ contains
 
 
   end
-
-
-
 
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   subroutine compute_Vorticity(movie)
@@ -1770,9 +1751,6 @@ contains
 
   end
 
-
-
-
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   subroutine compute_BPE
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
@@ -1895,10 +1873,6 @@ contains
 
   end
 
-
-
-
-
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   subroutine Bin_Ystar_and_Write(gname, field)
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
@@ -1996,14 +1970,6 @@ contains
 
   end
 
-
-
-
-
-
-
-
-
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   subroutine integrate_y_var(var, res)
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
@@ -2022,7 +1988,6 @@ contains
     res = res / Ly ! To get average
 
   end subroutine
-
 
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   subroutine integrate_z_var(var, res)
@@ -2047,8 +2012,6 @@ contains
     res = res / Lz ! Gives average
 
   end subroutine
-
-
 
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   subroutine reduce_and_write_XYplane(fname, gname, res, allreduce, movie)
@@ -2085,16 +2048,6 @@ contains
 
   end subroutine
 
-
-
-
-
-
-
-
-
-
-
   ! ---- LES ----
 
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
@@ -2128,8 +2081,8 @@ contains
       end do
     end do
 
-  ! Then, interpolate the u1 & u2 contribution onto GY
-  ! so that it conserves the dissipation as in code
+    ! Then, interpolate the u1 & u2 contribution onto GY
+    ! so that it conserves the dissipation as in code
     do j = 2, Nyp
       do k = 0, Nzp - 1
         do i = 0, Nxm1
