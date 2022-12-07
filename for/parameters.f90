@@ -186,7 +186,6 @@ contains
     open (11, file='input_chan.dat', form='formatted', status='old')
     ! Read input file.
 
-    current_version = 3.4
     read (11, *)
     read (11, *)
     read (11, *)
@@ -281,7 +280,7 @@ contains
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   subroutine read_input_toml
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
-    use tomlf, only: toml_table, toml_load, toml_error, get_value, len  
+    use tomlf 
     type(toml_table), allocatable :: table ! root table
     type(toml_error), allocatable :: error
     type(toml_table), pointer :: child ! subtables
@@ -379,7 +378,7 @@ contains
     number_of_scalars = len(array)
     if (number_of_scalars /= N_th) then 
       write (*,'("Error: ", I2.1, " scalars defined but ", &
-        I2.1, " scalars found in input.toml)') N_th number_of_scalars
+        I2.1, " scalars found in input.toml")') N_th number_of_scalars
       stop
     end if
     do n = 1, N_th
