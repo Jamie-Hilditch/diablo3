@@ -285,6 +285,7 @@ contains
     type(toml_error), allocatable :: error
     type(toml_table), pointer :: child ! subtables
     type(toml_array), pointer :: array ! toml arrays
+    character(len=:), allocatable :: string ! deferred length to read in strings
     integer :: number_of_scalars
     integer :: n
 
@@ -296,13 +297,15 @@ contains
     end if
 
     ! check the version number
-    call get_value(table,"VERSION", version)
+    call get_value(table,"VERSION", string)
+    version = string
     if (version /= current_version) &
       stop 'Wrong input version'
 
     ! set the scheme parameters
     call get_value(table,"SCHEME",child)
-    call get_value(child,"FLAVOUR",flavor)
+    call get_value(child,"FLAVOUR",string)
+    flavor = string
     call get_value(child,"USE_LES",use_LES)
     call get_value(child,"LES_MODEL_TYPE",les_model_type)
     call get_value(child,"BETA",beta)
@@ -378,7 +381,7 @@ contains
     number_of_scalars = len(array)
     if (number_of_scalars /= N_th) then 
       write (*,'("Error: ", I2.1, " scalars defined but ", &
-        I2.1, " scalars found in input.toml")') N_th number_of_scalars
+        I2.1, " scalars found in input.toml")') N_th, number_of_scalars
       stop
     end if
     do n = 1, N_th
