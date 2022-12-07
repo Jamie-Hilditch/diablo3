@@ -51,7 +51,7 @@ endif
 # TOML
 ifneq ($(TOML_INPUT),FALSE)
   FCFLAGS += -I$(TOML_INCLUDE) -I$(TOML_MODULES) -DTOML_INPUT
-  LD_FLAGS += -L$(TOML_LIB) -ltoml-f
+  LDFLAGS += -L$(TOML_LIB) -ltoml-f
 endif
 
 
