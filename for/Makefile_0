@@ -1,6 +1,7 @@
 # Flags (pass as commandline variables e.g. make DEBUG=TRUE)
 DEBUG ?= FALSE
 SHARED_MEMORY ?= FALSE
+TOML_INPUT ?= FALSE
 
 #############################################################################
 # Fortran 90 complier to use: gfortran or ifort
@@ -12,9 +13,14 @@ FFTW_LIB = /share/software/user/open/fftw/3.3.10/lib
 # FFTW include directory
 FFTW_INCLUDE = /share/software/user/open/fftw/3.3.10/include
 
-#############################################################################
+# TOML library to link 
+TOML_LIB = /home/users/hilditch/packages/toml-f/lib64
 
-LDFLAGS += -L$(FFTW_LIB) -lfftw3 -lgfortran
+# TOML include directory 
+TOML_INCLUDE = /home/users/hilditch/packages/toml-f/include
+TOML_MODULES = /home/users/hilditch/packages/toml-f/include/toml-f/modules
+
+#############################################################################
 
 # Optimise or debug(compiler dependent)
 ifeq ($(DEBUG),FALSE)
@@ -34,10 +40,21 @@ endif
 # Include FFTW
 FCFLAGS += -I$(FFTW_INCLUDE)
 
+# Link libraries
+LDFLAGS += -L$(FFTW_LIB) -lfftw3 -lgfortran
+
 # Shared memory
 ifneq ($(SHARED_MEMORY),FALSE)
   FCFLAGS += -DSHARED_MEMORY
 endif
+
+# TOML
+ifneq ($(TOML_INPUT),FALSE)
+  FCFLAGS += -I$(TOML_INCLUDE) -I$(TOML_MODULES) -DTOML_INPUT
+  LD_FLAGS += -L$(TOML_LIB) -ltoml-f
+endif
+
+
 
 # Parallel HDF5 compiler wrapper
 COMPILER = h5pfc

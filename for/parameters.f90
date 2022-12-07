@@ -3,14 +3,11 @@
 ! Option to use toml-f to read in the inputs as a toml file
 
 module parameters
-#ifdef TOML_INPUT 
-  use tomlf, only: toml_table, toml_parse, toml_error, get_value  
-#endif
   implicit none
   save
 
   ! current version - update if code is edited to invalidate old input files
-  real :: current_version = 3.4
+  character(len=4) :: current_version = "3.4"
 
   ! Specify data-types
   integer, parameter :: single_kind = kind(0.0)
@@ -24,7 +21,7 @@ module parameters
   include 'grid_def'
 
   ! Parameters set in inputs
-  real :: version
+  character(len=4) :: version
   ! scheme
   character(len=35) :: flavor
   logical :: use_mpi ! must be true
@@ -52,7 +49,7 @@ module parameters
   real(rkind) :: XcMovie, YcMovie, ZcMovie
   ! initial conditions 
   logical :: create_new_flow, reset_time
-  integer :: IC_type
+  integer :: IC_Type
   real(rkind) :: kick 
   logical :: physical_noise
   ! forcing
@@ -202,7 +199,7 @@ contains
     read (11, *)
     read (11, *) les_model_type
     read (11, *)
-    read (11, *) IC_type, kick, physical_noise
+    read (11, *) IC_Type, kick, physical_noise
     read (11, *)
     read (11, *) Ro
     read (11, *)
@@ -284,6 +281,124 @@ contains
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   subroutine read_input_toml
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
+    use tomlf, only: toml_table, toml_load, toml_error, get_value, len  
+    type(toml_table), allocatable :: table ! root table
+    type(toml_error), allocatable :: error
+    type(toml_table), pointer :: child ! subtables
+    type(toml_array), pointer :: array ! toml arrays
+    integer :: number_of_scalars
+    integer :: n
+
+    ! read in the root table
+    call toml_load(table,"input.toml",error=error)
+    if (allocated(error)) then
+      write (*,'("Error reading input.toml: ", A)') error%message
+      stop
+    end if
+
+    ! check the version number
+    call get_value(table,"VERSION", version)
+    if (version /= current_version) &
+      stop 'Wrong input version'
+
+    ! set the scheme parameters
+    call get_value(table,"SCHEME",child)
+    call get_value(child,"FLAVOUR",flavor)
+    call get_value(child,"USE_LES",use_LES)
+    call get_value(child,"LES_MODEL_TYPE",les_model_type)
+    call get_value(child,"BETA",beta)
+    call get_value(child,"NU_V_SCALE",nu_v_scale)
+
+    ! set the physical parameters
+    call get_value(table,"PHYSICAL",child)
+    call get_value(child,"LX",LX)
+    call get_value(child,"LY",LY)
+    call get_value(child,"LZ",LZ)
+    call get_value(child,"RE",Re)
+    call get_value(child,"RO",Ro)
+    call get_value(child,"DELTA",delta)
+    call get_value(child,"GRAV",array)
+    call get_value(array,1,grav_x)
+    call get_value(array,2,grav_z)
+    call get_value(array,3,grav_y)
+
+    ! set the timestepping parameters
+    call get_value(table,"TIMESTEPPING",child)
+    call get_value(child,"WALL_LIMIT",wall_time_limit)
+    call get_value(child,"TIME_LIMIT",time_limit)
+    call get_value(child,"DELTA_T",delta_t)
+    call get_value(child,"VARIABLE_DT",variable_dt)
+    call get_value(child,"CFL",CFL)
+    call get_value(child,"UPDATE_DT",update_dt)
+
+    ! set output parameters
+    call get_value(table,"OUTPUT",child)
+    call get_value(child,"VERBOSITY",verbosity)
+    call get_value(child,"SAVE_FLOW_DT",save_flow_dt)
+    call get_value(child,"SAVE_STATS_DT",save_stats_dt)
+    call get_value(child,"SAVE_MOVIE_DT",save_movie_dt)
+    call get_value(child,"MOVIE",array)
+    call get_value(array,1,XcMovie)
+    call get_value(array,2,ZcMovie)
+    call get_value(array,3,YcMovie)
+
+    ! set initial conditions parameters
+    call get_value(table,"INITIAL_CONDITIONS",child)
+    call get_value(child,"CREATE_NEW_FLOW",create_new_flow)
+    call get_value(child,"RESET_TIME",reset_time)
+    call get_value(child,"IC_TYPE",IC_Type)
+    call get_value(child,"KICK",kick)
+    call get_value(child,"PHYSICAL_NOISE",physical_noise)
+
+    ! set forcing parameters
+    call get_value(table,"FORCING",child)
+    call get_value(child,"F_TYPE",f_type)
+    call get_value(child,"UBULK0",ubulk0)
+    call get_value(child,"PX0",px0)
+    call get_value(child,"OMEGA0",omega0)
+    call get_value(child,"AMP_OMEGA0",amp_omega0)
+    call get_value(child,"FORCE_START",force_start)
+
+    ! set velocity bc parameters
+    call get_value(table,"VELOCITY_BCS",child)
+    call get_value(child,"U_BC_ZMIN",u_BC_Ymin)
+    call get_value(child,"U_BC_ZMIN_C1",u_BC_Ymin_c1)
+    call get_value(child,"V_BC_ZMIN",w_BC_Ymin)
+    call get_value(child,"V_BC_ZMIN_C1",w_BC_Ymin_c1)
+    call get_value(child,"W_BC_ZMIN",v_BC_Ymin)
+    call get_value(child,"W_BC_ZMIN_C1",v_BC_Ymin_c1)
+    call get_value(child,"U_BC_ZMAX",u_BC_Ymax)
+    call get_value(child,"U_BC_ZMAX_C1",u_BC_Ymax_c1)
+    call get_value(child,"V_BC_ZMAX",w_BC_Ymax)
+    call get_value(child,"V_BC_ZMAX_C1",w_BC_Ymax_c1)
+    call get_value(child,"W_BC_ZMAX",v_BC_Ymax)
+    call get_value(child,"W_BC_ZMAX_C1",v_BC_Ymax_c1)
+
+    ! set scalar parameters (array of tables)
+    call get_value(table, "SCALARS", array)
+    number_of_scalars = len(array)
+    if (number_of_scalars /= N_th) then 
+      write (*,'("Error: ", I2.1, " scalars defined but ", &
+        I2.1, " scalars found in input.toml)') N_th number_of_scalars
+      stop
+    end if
+    do n = 1, N_th
+      call get_value(array,n,child)
+      call get_value(child,"CREATE_FLOW_TH",create_new_th(n))
+      call get_value(child,"FILTER_TH",filter_th(n))
+      call get_value(child,"FILTER_INT",filter_int(n))
+      call get_value(child,"RI",Ri(n))
+      call get_value(child,"PR",Pr(n))
+      call get_value(child,"TH_BC_ZMIN",th_BC_Ymin(n))
+      call get_value(child,"TH_BC_ZMIN_C1",th_BC_Ymin_c1(n))
+      call get_value(child,"TH_BC_ZMAX",th_BC_Ymax(n))
+      call get_value(child,"TH_BC_ZMAX_C1",th_BC_Ymax_c1(n))
+    end do
+
+
+
+
+
   end
 
 #endif 

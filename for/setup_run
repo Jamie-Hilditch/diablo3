@@ -15,16 +15,22 @@ else
   exit 1
 fi 
 
-if [ "$3" = "--debug" ] || [ "$4" = "--debug" ]; then
+if [ "$3" = "--debug" ] || [ "$4" = "--debug" ] || [ "$5" = "--debug" ]; then
   DEBUG=TRUE
 else
   DEBUG=FALSE
 fi
 
-if [ "$3" = "--shared" ] || [ "$4" = "--shared" ]; then
+if [ "$3" = "--shared" ] || [ "$4" = "--shared" ] || [ "$5" = "--shared" ]; then
   SHARED_MEMORY=TRUE
 else
   SHARED_MEMORY=FALSE
+fi
+
+if [ "$3" = "--toml" ] || [ "$4" = "--toml" ] || [ "$5" = "--toml" ]; then
+  TOML_INPUT=TRUE
+else
+  TOML_INPUT=FALSE
 fi
 
 ################################################################
@@ -52,7 +58,7 @@ fi
 
 # Compile the code (in build)
 make clean
-make DEBUG=$DEBUG SHARED_MEMORY=$SHARED_MEMORY
+make DEBUG=$DEBUG SHARED_MEMORY=$SHARED_MEMORY TOML_INPUT=$TOML_INPUT
 
 # Copy the executable back to the run dir
 cp diablo $rundir
