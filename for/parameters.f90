@@ -126,6 +126,7 @@ contains
     write (*, '("Use LES: " L1)') use_LES
     if (use_LES) then 
       write(*, '("LES model type: " I2.1') les_model_type
+    endif
     write (*, '("Nu   = ", ES12.5)') nu
     write (*, '("Beta = ", ES12.5)') beta
 
