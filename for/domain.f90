@@ -7,8 +7,8 @@ module domain
   implicit none
 
   ! MPI parameters
-  integer :: NprocY, NprocZ, Nprocs,  NprocShared
-  include 'grid_mpi'
+  
+  include 'grid_mpi' ! integer, parameter :: NprocY, NprocZ, Nprocs,  NprocShared
   integer, parameter :: Nyp = (Ny-1)/NprocY + 1
   integer, parameter :: Nxp = Nx/(2*NprocZ) ! Nkxp... Since only need half in Fourier Space for Reals
   integer, parameter :: Nzp = Nz/(  NprocZ)

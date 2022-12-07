@@ -17,8 +17,7 @@ module parameters
   ! Grid
   ! (We hardwire these into the code so that the compiler may perform
   !  optimizations based on the grid size at compile time).
-  integer :: Nx, Ny, Nz, N_th
-  include 'grid_def'
+  include 'grid_def' ! integer, parameter :: Nx, Ny, Nz, N_th
 
   ! Parameters set in inputs
   character(len=4) :: version
@@ -289,6 +288,7 @@ contains
     type(toml_table), pointer :: child ! subtables
     type(toml_array), pointer :: array ! toml arrays
     character(len=:), allocatable :: string ! deferred length to read in strings
+    integer :: stat
     integer :: number_of_scalars
     integer :: n
 
@@ -309,8 +309,10 @@ contains
     call get_value(table,"SCHEME",child)
     call get_value(child,"FLAVOUR",string)
     flavor = string
-    call get_value(child,"USE_LES",use_LES)
-    call get_value(child,"LES_MODEL_TYPE",les_model_type)
+    call get_value(child,"USE_LES",use_LES, stat=stat)
+    write(*,'("USE_LES status: ", I2.1)') stat
+    call get_value(child,"LES_MODEL_TYPE",les_model_type, stat=stat)
+    write(*,'("les_model_type status: ", I2.1)') stat
     call get_value(child,"BETA",beta)
 
     ! set the physical parameters
