@@ -30,10 +30,10 @@ module parameters
   integer :: time_ad_meth ! must be 1
   integer :: les_model_type
   real(rkind) :: beta
-  real(rkind) :: nu_v_scale
   ! physical
   real(rkind) :: Lx, Ly, Lz
   real(rkind) :: Re, nu 
+  real(rkind) :: nu_v_scale
   real(rkind) :: Ro, Ro_inv 
   real(rkind) :: delta
   real(rkind) :: grav_x, grav_y, grav_z
@@ -115,15 +115,17 @@ contains
     integer n  
     
     write (*, '("Flavor: ", A35)') flavor
-    write (*, '("Nx = ", I10)') Nx
-    write (*, '("Ny = ", I10)') Ny
-    write (*, '("Nz = ", I10)') Nz
+    write (*, '("Nx = ", I10.3)') Nx
+    write (*, '("Ny = ", I10.3)') Ny
+    write (*, '("Nz = ", I10.3)') Nz
     do n = 1, N_th
       write (*, '("Scalar Number: ", I2)') n
       write (*, '("  Richardson number = ", ES12.5)') Ri(n)
       write (*, '("  Prandtl number    = ", ES12.5)') Pr(n)
     end do
     write (*, '("Use LES: " L1)') use_LES
+    if (use_LES) then 
+      write(*, '("LES model type: " I2.1') les_model_type
     write (*, '("Nu   = ", ES12.5)') nu
     write (*, '("Beta = ", ES12.5)') beta
 
@@ -309,7 +311,6 @@ contains
     call get_value(child,"USE_LES",use_LES)
     call get_value(child,"LES_MODEL_TYPE",les_model_type)
     call get_value(child,"BETA",beta)
-    call get_value(child,"NU_V_SCALE",nu_v_scale)
 
     ! set the physical parameters
     call get_value(table,"PHYSICAL",child)
@@ -317,6 +318,7 @@ contains
     call get_value(child,"LY",LY)
     call get_value(child,"LZ",LZ)
     call get_value(child,"RE",Re)
+    call get_value(child,"NU_V_SCALE",nu_v_scale)
     call get_value(child,"RO",Ro)
     call get_value(child,"DELTA",delta)
     call get_value(child,"GRAV",array)

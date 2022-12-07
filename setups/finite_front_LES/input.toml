@@ -7,12 +7,12 @@ FLAVOUR = "Front"
 USE_LES = true 
 LES_MODEL_TYPE = 5
 BETA = 1.0 # Horizontal viscosity laplacian exponent
-NU_V_SCALE = 1.0 # Vertical viscosity scale factor   NU_V=1/RE*NU_V_SCALE
 [PHYSICAL]
 LX = 1600.0
 LY = 100.0
 LZ = 1.0
 RE = 2.0e6 # Reynolds number
+NU_V_SCALE = 1.0 # Vertical viscosity scale factor   NU_V=1/RE*NU_V_SCALE
 RO = 1.0 # Rossby number (1/f)
 DELTA = 300.0 # aspect ratio
 GRAV = [0.0, 0.0, 1.0] # vertical (anti-gravity) unit vector
