@@ -1686,7 +1686,7 @@ contains
           Cdu1dz(i, k, j) = cikz(k) * cu1(i, k, j)
 
           Cdu2dx(i, k, j) = cikx(i) * cu2(i, k, j)
-          Cdu2dy(i, k, j) = (cu2(i, k, j + 1) - cu2(i, k, j))/dyf(j)
+          ! Cdu2dy(i, k, j) = (cu2(i, k, j + 1) - cu2(i, k, j))/dyf(j)
           Cdu2dz(i, k, j) = cikz(k) * cu2(i, k, j)
 
           Cdu3dx(i, k, j) = cikx(i) * cu3(i, k, j)
@@ -1700,6 +1700,7 @@ contains
       do k = 0, twoNkz
         do i = 0, Nxp - 1
           Cdu1dy(i, k, j) = (cu1(i, k, j) - cu1(i, k, j - 1)) / dy(j)
+          Cdu2dy(i, k, j) = (cu2(i, k, j) - cu2(i, k, j - 1)) / dyf(j - 1) ! check that this is correct
           Cdu3dy(i, k, j) = (cu3(i, k, j) - cu3(i, k, j - 1)) / dy(j)
         end do
       end do
