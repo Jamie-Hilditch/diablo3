@@ -1,7 +1,7 @@
 # input.toml
 # inputs for diablo. 
 # Note that the grid sizes and number of scalars are defined at compile time
-VERSION = "3.4"
+VERSION = "3.5"
 [SCHEME]
 FLAVOUR = "Front"
 USE_LES = true 
@@ -15,9 +15,9 @@ RE = 2.0e6 # Reynolds number
 NU_V_SCALE = 1.0 # Vertical viscosity scale factor   NU_V=1/RE*NU_V_SCALE
 RO = 1.0 # Rossby number (1/f)
 DELTA = 300.0 # aspect ratio
-GRAV = [0.0, 0.0, 1.0] # vertical (anti-gravity) unit vector
+GRAV = [0.0, 1.0, 0.0] # vertical (anti-gravity) unit vector
 [TIMESTEPPING]
-WALL_TIME = 40_000 # (s)
+WALL_TIME = 300 # (s)
 TIME_LIMIT = 15_000
 DELTA_T = 1.0e-5
 VARIABLE_DT = true
@@ -28,7 +28,7 @@ VERBOSITY = 2
 SAVE_FLOW_DT = 15_000
 SAVE_STATS_DT = 2.5
 SAVE_MOVIE_DT = 20.0
-MOVIE = [800.0, 0.0, 0.95] # X,Y,Z
+MOVIE = [800.0, 0.95, 0.0] # X,Y,Z
 [INITIAL_CONDITIONS]
 CREATE_NEW_FLOW = true
 RESET_TIME = false
@@ -43,18 +43,18 @@ OMEGA0 = 0.0
 AMP_OMEGA0 = 0.0
 FORCE_START = 0.0
 [VELOCITY_BCS] # 0 = Dirichlet, 1 = Neumann
-U_BC_ZMIN = 0
-U_BC_ZMIN_C1 = 0.0
-V_BC_ZMIN = 0
-V_BC_ZMIN_C1 = 0.0
-W_BC_ZMIN = 0
-W_BC_ZMIN_C1 = 0.0
-U_BC_ZMAX = 1
-U_BC_ZMAX_C1 = 0.0
-V_BC_ZMAX = 1
-V_BC_ZMAX_C1 = 0.0
-W_BC_ZMAX = 0
-W_BC_ZMAX_C1 = 0.0
+U_BC_YMIN = 0
+U_BC_YMIN_C1 = 0.0
+V_BC_YMIN = 0
+V_BC_YMIN_C1 = 0.0
+W_BC_YMIN = 0
+W_BC_YMIN_C1 = 0.0
+U_BC_YMAX = 1
+U_BC_YMAX_C1 = 0.0
+V_BC_YMAX = 0
+V_BC_YMAX_C1 = 0.0
+W_BC_YMAX = 1
+W_BC_YMAX_C1 = 0.0
 # Scalar parameters - double brackets creates an array of tables
 # repeat (with same name [[SCALARS]]) for each scalar
 [[SCALARS]]
@@ -63,17 +63,17 @@ FILTER_TH = false
 FILTER_INT = 10
 RI = 0.0 
 PR = 1.0
-TH_BC_ZMIN = 1
-TH_BC_ZMIN_C1 = 0.0
-TH_BC_ZMAX = 1
-TH_BC_ZMAX_C1 = 0.0
+TH_BC_YMIN = 1
+TH_BC_YMIN_C1 = 0.0
+TH_BC_YMAX = 1
+TH_BC_YMAX_C1 = 0.0
 # [[SCALARS]]
 # CREATE_FLOW_TH = true 
 # FILTER_TH = false 
 # FILTER_INT = 10
 # RI = 0.0 
 # PR = 1.0
-# TH_BC_ZMIN = 1
-# TH_BC_ZMIN_C1 = 0.0
-# TH_BC_ZMAX = 1
-# TH_BC_ZMAX_C1 = 0.0
+# TH_BC_YMIN = 1
+# TH_BC_YMIN_C1 = 0.0
+# TH_BC_YMAX = 1
+# TH_BC_YMAX_C1 = 0.0

@@ -7,7 +7,7 @@ module parameters
   save
 
   ! current version - update if code is edited to invalidate old input files
-  character(len=4) :: current_version = "3.4"
+  character(len=4) :: current_version = "3.5"
 
   ! Specify data-types
   integer, parameter :: single_kind = kind(0.0)
@@ -23,9 +23,7 @@ module parameters
   character(len=4) :: version
   ! scheme
   character(len=35) :: flavor
-  logical :: use_mpi ! must be true
   logical :: use_LES
-  integer :: num_per_dir ! must be 2
   integer :: time_ad_meth ! must be 1
   integer :: les_model_type
   real(rkind) :: beta
@@ -150,20 +148,18 @@ contains
     read (11, *) flavor, version
     if (version /= current_version) stop 'Wrong input data format.'
     read (11, *)
-    read (11, *) use_mpi, use_LES
-    if (use_mpi .eqv. .false.) stop 'Serial processing has been deprecated in diablo3.'
+    read (11, *) use_LES
     read (11, *)
     read (11, *) Re, beta, Lx, Lz, Ly
     read (11, *)
     read (11, *) nu_v_scale
     read (11, *)
-    read (11, *) num_per_dir, create_new_flow
-    if (num_per_dir /= 2) stop 'DIABLO only supports channel geometry (num_per_dim = 2)'
+    read (11, *) create_new_flow
     read (11, *)
     read (11, *) wall_time_limit, time_limit, delta_t, reset_time, &
       variable_dt, CFL, update_dt
     read (11, *)
-    read (11, *) verbosity, save_flow_dt, save_stats_dt, save_movie_dt, XcMovie, ZcMovie, YcMovie
+    read (11, *) verbosity, save_flow_dt, save_stats_dt, save_movie_dt, XcMovie, YcMovie, ZcMovie
     read (11, *)
     ! Read in the parameters for the N_th scalars
     do n = 1, N_th
@@ -206,7 +202,7 @@ contains
     read (11, *)
     read (11, *) delta
     read (11, *)
-    read (11, *) grav_x, grav_z, grav_y
+    read (11, *) grav_x, grav_y, grav_z
     read (11, *)
     read (11, *) f_type, ubulk0, px0, omega0, amp_omega0, force_start
     read (11, *)
@@ -286,9 +282,8 @@ contains
     type(toml_table), allocatable :: table ! root table
     type(toml_error), allocatable :: error
     type(toml_table), pointer :: child ! subtables
-    type(toml_array), pointer :: array ! toml arrays
-    character(len=:), allocatable :: string ! deferred length to read in strings
-    integer :: stat
+    type(toml_array), pointer :: array ! array of scalar tables
+    real(rkind)(3) :: vector ! for reading GRAV and MOVIE
     integer :: number_of_scalars
     integer :: n
 
@@ -300,89 +295,85 @@ contains
     end if
 
     ! check the version number
-    call get_value(table,"VERSION", string)
-    version = string
+    call get_string_from_table(table,"VERSION", version)
     if (version /= current_version) &
       stop 'Wrong input version'
 
     ! set the scheme parameters
     call get_value(table,"SCHEME",child)
-    call get_value(child,"FLAVOUR",string)
-    flavor = string
-    call get_value(child,"USE_LES",use_LES, stat=stat)
-    write(*,'("USE_LES status: ", I2.1)') stat
-    call get_value(child,"LES_MODEL_TYPE",les_model_type, stat=stat)
-    write(*,'("les_model_type status: ", I2.1)') stat
-    call get_value(child,"BETA",beta)
+    call get_string_from_table(child,"FLAVOUR",flavor)
+    call get_bool_from_table(child,"USE_LES",use_LES)
+    call get_int_from_table(child,"LES_MODEL_TYPE",les_model_type)
+    call get_float_from_table(child,"BETA",beta)
 
     ! set the physical parameters
     call get_value(table,"PHYSICAL",child)
-    call get_value(child,"LX",LX)
-    call get_value(child,"LY",LY)
-    call get_value(child,"LZ",LZ)
-    call get_value(child,"RE",Re)
-    call get_value(child,"NU_V_SCALE",nu_v_scale)
-    call get_value(child,"RO",Ro)
-    call get_value(child,"DELTA",delta)
-    call get_value(child,"GRAV",array)
-    call get_value(array,1,grav_x)
-    call get_value(array,2,grav_z)
-    call get_value(array,3,grav_y)
+    call get_float_from_table(child,"LX",LX)
+    call get_float_from_table(child,"LY",LY)
+    call get_float_from_table(child,"LZ",LZ)
+    call get_float_from_table(child,"RE",Re)
+    call get_float_from_table(child,"NU_V_SCALE",nu_v_scale)
+    call get_float_from_table(child,"RO",Ro)
+    call get_float_from_table(child,"DELTA",delta)
+    call get_floats_from_table(child,"GRAV",vector)
+    grav_x = vector(1)
+    grav_y = vector(2)
+    grav_z = vector(3)
 
     ! set the timestepping parameters
     call get_value(table,"TIMESTEPPING",child)
-    call get_value(child,"WALL_LIMIT",wall_time_limit)
-    call get_value(child,"TIME_LIMIT",time_limit)
-    call get_value(child,"DELTA_T",delta_t)
-    call get_value(child,"VARIABLE_DT",variable_dt)
-    call get_value(child,"CFL",CFL)
-    call get_value(child,"UPDATE_DT",update_dt)
+    call get_float_from_table(child,"WALL_LIMIT",wall_time_limit)
+    call get_float_from_table(child,"TIME_LIMIT",time_limit)
+    call get_float_from_table(child,"DELTA_T",delta_t)
+    call get_bool_from_table(child,"VARIABLE_DT",variable_dt)
+    call get_float_from_table(child,"CFL",CFL)
+    call get_int_from_table(child,"UPDATE_DT",update_dt)
 
     ! set output parameters
     call get_value(table,"OUTPUT",child)
-    call get_value(child,"VERBOSITY",verbosity)
-    call get_value(child,"SAVE_FLOW_DT",save_flow_dt)
-    call get_value(child,"SAVE_STATS_DT",save_stats_dt)
-    call get_value(child,"SAVE_MOVIE_DT",save_movie_dt)
-    call get_value(child,"MOVIE",array)
-    call get_value(array,1,XcMovie)
-    call get_value(array,2,ZcMovie)
-    call get_value(array,3,YcMovie)
+    call get_int_from_table(child,"VERBOSITY",verbosity)
+    call get_float_from_table(child,"SAVE_FLOW_DT",save_flow_dt)
+    call get_float_from_table(child,"SAVE_STATS_DT",save_stats_dt)
+    call get_float_from_table(child,"SAVE_MOVIE_DT",save_movie_dIC_Typet)
+    call get_floats_from_table(child,"MOVIE",vector)
+    XcMovie = vector(1)
+    YcMovie = vector(2)
+    ZcMovie = vector(3)
 
     ! set initial conditions parameters
     call get_value(table,"INITIAL_CONDITIONS",child)
-    call get_value(child,"CREATE_NEW_FLOW",create_new_flow)
-    call get_value(child,"RESET_TIME",reset_time)
-    call get_value(child,"IC_TYPE",IC_Type)
-    call get_value(child,"KICK",kick)
-    call get_value(child,"PHYSICAL_NOISE",physical_noise)
+    call get_bool_from_table(child,"CREATE_NEW_FLOW",create_new_flow)
+    call get_bool_from_table(child,"RESET_TIME",reset_time)
+    call get_int_from_table(child,"IC_TYPE",IC_Type)
+    call get_float_from_table(child,"KICK",kick)
+    call get_bool_from_table(child,"PHYSICAL_NOISE",physical_noise)
 
     ! set forcing parameters
     call get_value(table,"FORCING",child)
-    call get_value(child,"F_TYPE",f_type)
-    call get_value(child,"UBULK0",ubulk0)
-    call get_value(child,"PX0",px0)
-    call get_value(child,"OMEGA0",omega0)
-    call get_value(child,"AMP_OMEGA0",amp_omega0)
-    call get_value(child,"FORCE_START",force_start)
+    call get_int_from_table(child,"F_TYPE",f_type)
+    call get_float_from_table(child,"UBULK0",ubulk0)
+    call get_float_from_table(child,"PX0",px0)
+    call get_float_from_table(child,"OMEGA0",omega0)
+    call get_float_from_table(child,"AMP_OMEGA0",amp_omega0)
+    call get_float_from_table(child,"FORCE_START",force_start)
 
     ! set velocity bc parameters
     call get_value(table,"VELOCITY_BCS",child)
-    call get_value(child,"U_BC_ZMIN",u_BC_Ymin)
-    call get_value(child,"U_BC_ZMIN_C1",u_BC_Ymin_c1)
-    call get_value(child,"V_BC_ZMIN",w_BC_Ymin)
-    call get_value(child,"V_BC_ZMIN_C1",w_BC_Ymin_c1)
-    call get_value(child,"W_BC_ZMIN",v_BC_Ymin)
-    call get_value(child,"W_BC_ZMIN_C1",v_BC_Ymin_c1)
-    call get_value(child,"U_BC_ZMAX",u_BC_Ymax)
-    call get_value(child,"U_BC_ZMAX_C1",u_BC_Ymax_c1)
-    call get_value(child,"V_BC_ZMAX",w_BC_Ymax)
-    call get_value(child,"V_BC_ZMAX_C1",w_BC_Ymax_c1)
-    call get_value(child,"W_BC_ZMAX",v_BC_Ymax)
-    call get_value(child,"W_BC_ZMAX_C1",v_BC_Ymax_c1)
+    call get_int_from_table(child,"U_BC_YMIN",u_BC_Ymin)
+    call get_float_from_table(child,"U_BC_YMIN_C1",u_BC_Ymin_c1)
+    call get_int_from_table(child,"V_BC_YMIN",w_BC_Ymin)
+    call get_float_from_table(child,"V_BC_YMIN_C1",w_BC_Ymin_c1)
+    call get_int_from_table(child,"W_BC_YMIN",v_BC_Ymin)
+    call get_float_from_table(child,"W_BC_YMIN_C1",v_BC_Ymin_c1)
+    call get_int_from_table(child,"U_BC_YMAX",u_BC_Ymax)
+    call get_float_from_table(child,"U_BC_YMAX_C1",u_BC_Ymax_c1)
+    call get_int_from_table(child,"V_BC_YMAX",w_BC_Ymax)
+    call get_float_from_table(child,"V_BC_YMAX_C1",w_BC_Ymax_c1)
+    call get_int_from_table(child,"W_BC_YMAX",v_BC_Ymax)
+    call get_float_from_table(child,"W_BC_YMAX_C1",v_BC_Ymax_c1)
 
     ! set scalar parameters (array of tables)
-    call get_value(table, "SCALARS", array)
+    call get_value(table, "SCALARS", array,stat=stat)
     number_of_scalars = len(array)
     if (number_of_scalars /= N_th) then 
       write (*,'("Error: ", I2.1, " scalars defined but ", &
@@ -391,23 +382,123 @@ contains
     end if
     do n = 1, N_th
       call get_value(array,n,child)
-      call get_value(child,"CREATE_FLOW_TH",create_new_th(n))
-      call get_value(child,"FILTER_TH",filter_th(n))
-      call get_value(child,"FILTER_INT",filter_int(n))
-      call get_value(child,"RI",Ri(n))
-      call get_value(child,"PR",Pr(n))
-      call get_value(child,"TH_BC_ZMIN",th_BC_Ymin(n))
-      call get_value(child,"TH_BC_ZMIN_C1",th_BC_Ymin_c1(n))
-      call get_value(child,"TH_BC_ZMAX",th_BC_Ymax(n))
-      call get_value(child,"TH_BC_ZMAX_C1",th_BC_Ymax_c1(n))
+      call get_bool_from_table(child,"CREATE_FLOW_TH",create_new_th(n))
+      call get_bool_from_table(child,"FILTER_TH",filter_th(n))
+      call get_int_from_table(child,"FILTER_INT",filter_int(n))
+      call get_float_from_table(child,"RI",Ri(n))
+      call get_float_from_table(child,"PR",Pr(n))
+      call get_int_from_table(child,"TH_BC_YMIN",th_BC_Ymin(n))
+      call get_float_from_table(child,"TH_BC_YMIN_C1",th_BC_Ymin_c1(n))
+      call get_int_from_table(child,"TH_BC_YMAX",th_BC_Ymax(n))
+      call get_float_from_table(child,"TH_BC_YMAX_C1",th_BC_Ymax_c1(n))
     end do
 
+  contains
+    ! define a series of wrappers for get_value that get check the status 
+    ! and print error messages
+    
+    subroutine get_float_from_table(table,varname,float)
+      use tomlf
+      type(toml_table), intent(inout) :: table 
+      character(len=*), intent(in) :: varname
+      real(rkind), intent(out) :: float
+      integer :: stat
+      
+      call get_value(table,varname,float,stat=stat)
+      call check_stat(stat,varname,"float")
+    end
 
+    subroutine get_floats_from_table(table,varname,floats)
+      ! read an array of floats
+      type(toml_table), intent(inout) :: table
+      integer, intent(in) :: index
+      real(rkind)(:), intent(out) :: floats
+      type(toml_array) :: arr
+      integer :: stat
+      integer :: i, arr_len
+      character(len=30) :: varname_index
+      
+      call get_value(arr,varname,array,stat=stat)
+      call check_stat(stat,varname,"array")
+      arr_len = len(arr)
+      if (arr_len /= size(floats)) then 
+        write(*,'("Error: Read ", I2.1, "floats from ", A, &
+          " expected " ,I2.1)') arr_len, varname, size(floats)
+        stop 
+      endif
+      do i = 1,arr_len
+        call get_value(arr, i, floats(i),stat=stat)
+        if (stat /= 0) then 
+          write (varname_index,'(A,"-",I2.1)') varname, i
+          call check_stat(stat,varname_index,"float")
+        endif
+      end do
+    end
 
+    subroutine get_int_from_table(table,varname,int)
+      use tomlf
+      type(toml_table), intent(inout) :: table 
+      character(len=*), intent(in) :: varname
+      integer, intent(out) :: int
+      integer :: stat
+      
+      call get_value(table,varname,int,stat=stat)
+      call check_stat(stat,varname,"integer")
+    end
 
+    subroutine get_bool_from_table(table,varname,bool)
+      use tomlf
+      type(toml_table), intent(inout) :: table 
+      character(len=*), intent(in) :: varname
+      logical, intent(out) :: bool
+      integer :: stat
+      
+      call get_value(table,varname,bool,stat=stat)
+      call check_stat(stat,varname,"boolean")
+    end
 
+    subroutine get_string_from_table(table,varname,string)
+      use tomlf
+      type(toml_table), intent(inout) :: table 
+      character(len=*), intent(in) :: varname
+      character(len=*), intent(out) :: string
+      character(len=:), allocatable :: temp
+      integer :: stat
+      
+      call get_value(table,varname,temp,stat=stat)
+      call check_stat(stat,varname,"string")
+      string = temp
+    end
+    
+    subroutine check_stat(stat,varname,datatype)
+      ! catch all errors because otherwise toml-f will silently convert some types
+      ! also display useful error message for fixing the input file
+      integer, intent(in) :: stat
+      character(len=*), intent(in) :: varname
+      character(len=*), intent(in) :: datatype
+
+      if (stat == toml_stat%success) then
+        return
+      else if (stat == toml_stat%duplicate_key) then
+        write(*,'("Error: Duplicate key when reading", A, ". Check your input file")') varname
+        stop 
+      else if (stat == toml_stat%type_mismatch) then
+        write(*,'("Error: Wrong type when reading", A, ". Expected ", A)') varname, datatype
+        stop 
+      else if (stat == toml_stat%conversion_error) then
+        write(*,'("Error: Error converting", A, " to ", A)') varname, datatype
+        stop 
+      else if (stat == toml_stat%fatal) then
+        write(*,'("Error: Fatal error in toml-f when reading", A, " :(")') varname
+        stop 
+      else 
+        write(*,'("Error: Undefined error in toml-f when reading", A, " :(")') varname
+        stop 
+      end if
+    end
+    
   end
-
+  
 #endif 
 ! TOML_INPUT
 
