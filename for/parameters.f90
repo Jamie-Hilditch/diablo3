@@ -417,7 +417,7 @@ contains
       integer :: i, arr_len
       character(len=30) :: varname_index
       
-      call get_value(arr,varname,array,stat=stat)
+      call get_value(table,varname,arr,stat=stat)
       call check_stat(stat,varname,"array")
       arr_len = len(arr)
       if (arr_len /= size(floats)) then 
