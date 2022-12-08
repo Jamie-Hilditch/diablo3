@@ -324,7 +324,7 @@ contains
 
     ! set the timestepping parameters
     call get_value(table,"TIMESTEPPING",child)
-    call get_float_from_table(child,"WALL_LIMIT",wall_time_limit)
+    call get_float_from_table(child,"WALL_TIME_LIMIT",wall_time_limit)
     call get_float_from_table(child,"TIME_LIMIT",time_limit)
     call get_float_from_table(child,"DELTA_T",delta_t)
     call get_bool_from_table(child,"VARIABLE_DT",variable_dt)

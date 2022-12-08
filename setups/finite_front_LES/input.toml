@@ -17,7 +17,7 @@ RO = 1.0 # Rossby number (1/f)
 DELTA = 300.0 # aspect ratio
 GRAV = [0.0, 1.0, 0.0] # vertical (anti-gravity) unit vector
 [TIMESTEPPING]
-WALL_TIME = 300 # (s)
+WALL_TIME_LIMIT = 300 # (s)
 TIME_LIMIT = 15_000
 DELTA_T = 1.0e-5
 VARIABLE_DT = true
