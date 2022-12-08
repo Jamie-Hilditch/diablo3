@@ -78,12 +78,13 @@ program diablo
   call set_flow
   call pre_first_step(compute_pressure)
 
-  call save_stats_chan(save_movie_dt/=0,.false.)
-  if (use_LES) call save_stats_LES_OOL(.true.)
-
   ! Initialize start_wall_time for run timing
   call wall_time(start_wall_time)
-  previous_wall_time = start_wall_time
+  call save_stats_chan(save_movie_dt/=0,.false.)
+  if (use_LES) call save_stats_LES_OOL(.true.)
+  call wall_time(previous_wall_time)
+  write (*,'("Elapsed Wall Time to Save Stats: ", ES13.3)') (previous_wall_time - start_wall_time)
+  
 
   if (rank == 0) then
     write (*, *)
