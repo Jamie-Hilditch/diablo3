@@ -334,7 +334,7 @@ contains
     call get_int_from_table(child,"VERBOSITY",verbosity)
     call get_float_from_table(child,"SAVE_FLOW_DT",save_flow_dt)
     call get_float_from_table(child,"SAVE_STATS_DT",save_stats_dt)
-    call get_float_from_table(child,"SAVE_MOVIE_DT",save_movie_dIC_Typet)
+    call get_float_from_table(child,"SAVE_MOVIE_DT",save_movie_dt)
     call get_floats_from_table(child,"MOVIE",vector)
     XcMovie = vector(1)
     YcMovie = vector(2)
@@ -373,7 +373,7 @@ contains
     call get_float_from_table(child,"W_BC_YMAX_C1",v_BC_Ymax_c1)
 
     ! set scalar parameters (array of tables)
-    call get_value(table, "SCALARS", array,stat=stat)
+    call get_value(table, "SCALARS", array)
     number_of_scalars = len(array)
     if (number_of_scalars /= N_th) then 
       write (*,'("Error: ", I2.1, " scalars defined but ", &
@@ -410,7 +410,7 @@ contains
     subroutine get_floats_from_table(table,varname,floats)
       ! read an array of floats
       type(toml_table), intent(inout) :: table
-      integer, intent(in) :: index
+      character(len=*), intent(in) :: varname
       real(rkind), intent(out) :: floats(:)
       type(toml_array) :: arr
       integer :: stat
