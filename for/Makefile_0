@@ -41,7 +41,7 @@ endif
 FCFLAGS += -I$(FFTW_INCLUDE)
 
 # Link libraries
-LDFLAGS += -L$(FFTW_LIB) -lfftw3 -lgfortran
+LDFLAGS += -lgfortran -L$(FFTW_LIB) -lfftw3 
 
 # Shared memory
 ifneq ($(SHARED_MEMORY),FALSE)
@@ -50,7 +50,7 @@ endif
 
 # TOML
 ifneq ($(TOML_INPUT),FALSE)
-  FCFLAGS += -I$(TOML_INCLUDE) -I$(TOML_MODULES) -DTOML_INPUT
+  FCFLAGS += -I$(TOML_MODULES) -DTOML_INPUT
   LDFLAGS += -L$(TOML_LIB) -ltoml-f
 endif
 

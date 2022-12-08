@@ -112,9 +112,9 @@ contains
     integer n  
     
     write (*, '("Flavor: ", A35)') flavor
-    write (*, '("Nx = ", I10.3)') Nx
-    write (*, '("Ny = ", I10.3)') Ny
-    write (*, '("Nz = ", I10.3)') Nz
+    write (*, '("Nx = ", I6)') Nx
+    write (*, '("Ny = ", I6)') Ny
+    write (*, '("Nz = ", I6)') Nz
     do n = 1, N_th
       write (*, '("Scalar Number: ", I2)') n
       write (*, '("  Richardson number = ", ES12.5)') Ri(n)
