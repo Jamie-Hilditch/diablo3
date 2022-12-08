@@ -16,9 +16,8 @@ FFTW_INCLUDE = /share/software/user/open/fftw/3.3.10/include
 # TOML library to link 
 TOML_LIB = /home/users/hilditch/packages/toml-f/lib64
 
-# TOML include directory 
-TOML_INCLUDE = /home/users/hilditch/packages/toml-f/include
-TOML_MODULES = /home/users/hilditch/packages/toml-f/include/toml-f/modules
+# TOML include modules directory 
+TOML_INCLUDE = /home/users/hilditch/packages/toml-f/include/toml-f/modules
 
 #############################################################################
 
@@ -50,7 +49,7 @@ endif
 
 # TOML
 ifneq ($(TOML_INPUT),FALSE)
-  FCFLAGS += -I$(TOML_MODULES) -DTOML_INPUT
+  FCFLAGS += -I$(TOML_INCLUDE) -DTOML_INPUT
   LDFLAGS += -L$(TOML_LIB) -ltoml-f
 endif
 
