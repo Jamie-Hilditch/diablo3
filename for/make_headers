@@ -1,8 +1,8 @@
 # !/bin/bash
 
 # Input: Number of Processors in NON-CODE Coordinates ($1)
-NPz=$1
-NPy=$2
+NPy=$1
+NPz=$2
 
 rm -f grid_def
 rm -f grid_mpi
@@ -25,6 +25,6 @@ printf 'integer, parameter :: N%s = %d\n'  'X' $Nx \
 
 # Modify to change the processor loading (3D)
 printf 'integer, parameter :: Nproc%s = %d\n'    'S' $((NPy*NPz)) \
-                                              'Y' $NPz \
-                                              'Z' $NPy  \
+                                              'Y' $NPy \
+                                              'Z' $NPz  \
        >> grid_mpi

@@ -2,16 +2,16 @@
 
 # Input: Number of Processors
 if [[ $1 =~ [0-9]+ ]]; then
-  NPz=$1
+  NPy=$1
 else
-  echo "First argument NPz must be a positive integer"
+  echo "First argument NPy must be a positive integer"
   exit 1
 fi 
 
 if [[ $2 =~ [0-9]+ ]]; then
-  NPy=$2
+  NPz=$2
 else
-  echo "Second argument NPy must be a positive integer"
+  echo "Second argument NPz must be a positive integer"
   exit 1
 fi 
 
@@ -47,7 +47,7 @@ cp $rundir/grid_def.all ./
 cp $rundir/grid.h5 ./
 
 # Generate grid header files
-bash make_headers $NPz $NPy
+bash make_headers $NPy $NPz
 
 # Copy Custom Makefile, if present
 if test -f "${rundir}/Makefile"; then
