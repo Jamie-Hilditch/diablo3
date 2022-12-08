@@ -126,6 +126,8 @@ contains
     endif
     write (*, '("Nu   = ", ES12.5)') nu
     write (*, '("Beta = ", ES12.5)') beta
+    write (*, '("Wall time limit = ", ES12.5)') wall_time_limit
+    write (*, '("Sim time limit  = ", ES12.5)') time_limit
 
   end
 

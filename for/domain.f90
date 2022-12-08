@@ -139,7 +139,7 @@ contains
       write (*, '("MPI Initialised with ", I10, " processors")') Nprocs
     call mpi_barrier(mpi_comm_world, ierror)
     if (verbosity > 3 .and. rank == 0) &
-      write (*, '("Rank, rankZ, rankY: " 3I10)') rank, rankY, rankZ
+      write (*, '("Rank, rankY, rankZ: " 3I10)') rank, rankY, rankZ
 
 
     ! ------------------------------
@@ -215,24 +215,15 @@ contains
     do i = 0, Nx
       gx(i) = (i * Lx) / Nx
       dx(i) = Lx / Nx
-      if (verbosity > 3 .and. rank == 0) &
+      if (verbosity > 4 .and. rank == 0) &
         write (*, *) 'GX(', i, ') = ', gx(i)
     end do
     if (rank == 0) &
-      write (*, '("Fourier in Y")')
-    do k = 0, Nz
-      gz(k) = (k * Lz) / Nz
-      dz(k) = Lz / Nz
-      if (rank == 0 .and. verbosity > 3) &
-        write (*, *) 'GY(', k, ') = ', gz(k)
-    end do
-    if (rank == 0) &
-      write (*, '("Finite-difference in Z")')
+      write (*, '("Finite-difference in Y")')
 
     fname = 'grid.h5'
     call mpi_barrier(mpi_comm_world, ierror)
     call ReadGridHDF5(fname, 2)
-
 
     ! Define grid spacing
     do j = 1, Nyp + 1
@@ -260,6 +251,15 @@ contains
       call mpi_recv(dyf(Nyp + 1), 1, mpi_double_precision, rankY + 1, &
                     100 + rankY + 1, mpi_comm_y, status, ierror)
     end if
+
+    if (rank == 0) &
+      write (*, '("Fourier in Z")')
+    do k = 0, Nz
+      gz(k) = (k * Lz) / Nz
+      dz(k) = Lz / Nz
+      if (rank == 0 .and. verbosity > 4) &
+        write (*, *) 'GZ(', k, ') = ', gz(k)
+    end do
 
     return
   end
