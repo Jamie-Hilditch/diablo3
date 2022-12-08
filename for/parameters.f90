@@ -283,7 +283,7 @@ contains
     type(toml_error), allocatable :: error
     type(toml_table), pointer :: child ! subtables
     type(toml_array), pointer :: array ! array of scalar tables
-    real(rkind)(3) :: vector ! for reading GRAV and MOVIE
+    real(rkind) :: vector(3) ! for reading GRAV and MOVIE
     integer :: number_of_scalars
     integer :: n
 
@@ -398,7 +398,6 @@ contains
     ! and print error messages
     
     subroutine get_float_from_table(table,varname,float)
-      use tomlf
       type(toml_table), intent(inout) :: table 
       character(len=*), intent(in) :: varname
       real(rkind), intent(out) :: float
@@ -412,7 +411,7 @@ contains
       ! read an array of floats
       type(toml_table), intent(inout) :: table
       integer, intent(in) :: index
-      real(rkind)(:), intent(out) :: floats
+      real(rkind), intent(out) :: floats(:)
       type(toml_array) :: arr
       integer :: stat
       integer :: i, arr_len
@@ -436,7 +435,6 @@ contains
     end
 
     subroutine get_int_from_table(table,varname,int)
-      use tomlf
       type(toml_table), intent(inout) :: table 
       character(len=*), intent(in) :: varname
       integer, intent(out) :: int
@@ -447,7 +445,6 @@ contains
     end
 
     subroutine get_bool_from_table(table,varname,bool)
-      use tomlf
       type(toml_table), intent(inout) :: table 
       character(len=*), intent(in) :: varname
       logical, intent(out) :: bool
@@ -458,7 +455,6 @@ contains
     end
 
     subroutine get_string_from_table(table,varname,string)
-      use tomlf
       type(toml_table), intent(inout) :: table 
       character(len=*), intent(in) :: varname
       character(len=*), intent(out) :: string
