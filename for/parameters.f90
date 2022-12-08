@@ -150,7 +150,7 @@ contains
     read (11, *)
     read (11, *) use_LES
     read (11, *)
-    read (11, *) Re, beta, Lx, Lz, Ly
+    read (11, *) Re, beta, Lx, Ly, Lz
     read (11, *)
     read (11, *) nu_v_scale
     read (11, *)
@@ -479,7 +479,7 @@ contains
         write(*,'("Error: Duplicate key when reading", A, ". Check your input file")') varname
         stop 
       else if (stat == toml_stat%type_mismatch) then
-        write(*,'("Error: Wrong type when reading", A, ". Expected ", A)') varname, datatype
+        write(*,'("Error: Wrong type when reading ", A, ". Expected ", A)') varname, datatype
         stop 
       else if (stat == toml_stat%conversion_error) then
         write(*,'("Error: Error converting", A, " to ", A)') varname, datatype
