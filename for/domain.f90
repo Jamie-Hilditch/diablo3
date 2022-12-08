@@ -8,10 +8,11 @@ module domain
 
   ! MPI parameters
   
-  include 'grid_mpi' ! integer, parameter :: NprocY, NprocZ, Nprocs,  NprocShared
+  include 'grid_mpi' ! integer, parameter :: NprocY, NprocZ, Nprocs
   integer, parameter :: Nyp = (Ny-1)/NprocY + 1
   integer, parameter :: Nxp = Nx/(2*NprocZ) ! Nkxp... Since only need half in Fourier Space for Reals
   integer, parameter :: Nzp = Nz/(  NprocZ)
+  integer :: NprocShared
 
   ! Derived Constants
   integer, parameter :: Nkx = Nx/3
