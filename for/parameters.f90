@@ -412,7 +412,7 @@ contains
       type(toml_table), intent(inout) :: table
       character(len=*), intent(in) :: varname
       real(rkind), intent(out) :: floats(:)
-      type(toml_array) :: arr
+      type(toml_array), pointer :: arr
       integer :: stat
       integer :: i, arr_len
       character(len=30) :: varname_index
