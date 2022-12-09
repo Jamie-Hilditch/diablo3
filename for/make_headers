@@ -15,8 +15,8 @@ Nth=$( sed '5 s/[^0-9]*//g p;d' grid_def.all )
 
 
 printf 'integer, parameter :: N%s = %d\n'  'X' $Nx \
-                                           'Y' $Nz \
-                                           'Z' $Ny \
+                                           'Y' $Ny \
+                                           'Z' $Nz \
                                            '_TH' $Nth \
        >> grid_def
 
