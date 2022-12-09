@@ -97,12 +97,12 @@ contains
     call mpi_comm_rank(mpi_comm_shared, rankShared, ierror)
     call mpi_comm_size(mpi_comm_shared, NprocShared, ierror)
     if (NprocShared < NprocZ) then
-      if (rank == 0) write (*, '("Error: NprocShared must be larger than NprocY!")')
+      if (rank == 0) write (*, '("Error: NprocShared must be larger than NprocZ!")')
       call mpi_finalize(ierror)
       stop
     end if
     if (mod(NprocShared, NprocZ) /= 0) then
-      if (rank == 0) write (*, '("Error: NprocShared is Not a Multiple of NprocY!")')
+      if (rank == 0) write (*, '("Error: NprocShared is Not a Multiple of NprocZ!")')
       call mpi_finalize(ierror)
       stop
     end if
