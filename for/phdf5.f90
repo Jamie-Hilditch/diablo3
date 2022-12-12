@@ -152,10 +152,6 @@ contains
     return
   end subroutine WriteHDF5_real
 
-
-
-
-
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   subroutine WriteStatH5_Y(fname, gname, Diag)
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
@@ -308,10 +304,6 @@ contains
 
   end subroutine WriteStatH5_Y
 
-
-
-
-
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   subroutine WriteStatH5_X(fname, gname, Diag, NperProc)
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
@@ -459,10 +451,6 @@ contains
     call h5close_f(Error)
 
   end subroutine WriteStatH5_X
-
-
-
-
 
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   subroutine WriteHDF5_XYplane(fname, gname, var2d)
@@ -617,10 +605,6 @@ contains
 
   end subroutine WriteHDF5_XYplane
 
-
-
-
-
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   subroutine WriteHDF5_XZplane(fname, gname, var2d)
     !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
@@ -766,8 +750,6 @@ contains
     call h5close_f(Error)
 
   end subroutine WriteHDF5_XZplane
-
-
 
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
   subroutine WriteHDF5_ZYplane(fname, gname, var2d)
@@ -1124,10 +1106,10 @@ contains
         call g2gf(u2)
         call swapzy(u2, tmp)
         call gf2g(u2)
-        dname = "W"
+        dname = "V"
       case (3)
         call swapzy(u3, tmp)
-        dname = "V"
+        dname = "W"
       case (4:)
         call swapzy(th(:, :, :, ith - 3), tmp)
         dname = "TH"//char(ith + 45)
@@ -1356,9 +1338,9 @@ contains
       case (1)
         dname = "U"
       case (2)
-        dname = "W"
-      case (3)
         dname = "V"
+      case (3)
+        dname = "W"
       case (4:)
         dname = "TH"//char(ith + 45)
       end select
