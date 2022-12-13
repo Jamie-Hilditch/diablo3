@@ -36,7 +36,7 @@ fi
 ################################################################
 
 rundir=`pwd`
-codedir=$GROUP_HOME/hilditch/scripts/diablo3/for
+codedir=$(dirname $0)
 
 
 # Copy grid files from run dir
