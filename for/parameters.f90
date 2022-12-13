@@ -307,6 +307,7 @@ contains
     call get_bool_from_table(child,"USE_LES",use_LES)
     call get_int_from_table(child,"LES_MODEL_TYPE",les_model_type)
     call get_float_from_table(child,"BETA",beta)
+    time_ad_meth = 1
 
     ! set the physical parameters
     call get_value(table,"PHYSICAL",child)
