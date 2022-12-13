@@ -26,6 +26,10 @@ class start():
         self.V = np.empty((setup.NZ,setup.NY+1,setup.NX))
         self.W = np.empty((setup.NZ,setup.NY,setup.NX))
         self.TH = np.empty((self.NTH,setup.NZ,setup.NY,setup.NX))
+        self.x = setup.x_grid 
+        self.G = setup.G 
+        self.GF = setup.GF 
+        self.z = setup.z_grid
         self.ZF, self.YF, self.XF = np.meshgrid(setup.z_grid,setup.GF,setup.x_grid,sparse='true',indexing='ij')
         self.ZB, self.YB, self.XB = np.meshgrid(setup.z_grid,setup.G,setup.x_grid,sparse='true',indexing='ij')
         self.Time = 0
@@ -40,25 +44,21 @@ class start():
     def write_start_file(self):
         filepath = os.path.join(self.directory,'start.h5')
         with h5py.File(filepath,'w') as f:
-            f.create('Resolution',[self.NZ,self.NY,self.NX],dtype=np.dtype('i'))
+            f.attrs.create('Resolution',[self.NZ,self.NY,self.NX],dtype=np.dtype('i'))
             grp = f.create_group('Timestep')
-            grp.create('Time',self.Time,dtype=np.float64)
-            grp.create('Save_Flow_Time',self.Save_Flow_Time,dtype=np.float64)
-            grp.create('Save_Stats_Time',self.Save_Stats_Time,dtype=np.float64)
-            grp.create('Save_Movie_Time',self.Save_Movie_Time,dtype=np.float64)
-            grp.create('Time_Step',self.Time_Step,dtype=np.dtype('i'))
+            grp.attrs.create('Time',self.Time,dtype=np.float64)
+            grp.attrs.create('Save_Flow_Time',self.Save_Flow_Time,dtype=np.float64)
+            grp.attrs.create('Save_Stats_Time',self.Save_Stats_Time,dtype=np.float64)
+            grp.attrs.create('Save_Movie_Time',self.Save_Movie_Time,dtype=np.float64)
+            grp.attrs.create('Time_Step',self.Time_Step,dtype=np.dtype('i'))
 
-            grp.create_dataset('U',self.U,dtype=np.float64)
-            grp.create_dataset('V',self._compute_V_on_fractional_grid(),dtype=np.float64)
-            grp.create_dataset('W',self.W,dtype=np.float64)
+            grp.create_dataset('U',data=self.U,shape=(self.NZ,self.NY,self.NX),dtype=np.float64)
+            grp.create_dataset('V',data=self._compute_V_on_fractional_grid(),shape=(self.NZ,self.NY,self.NX),dtype=np.float64)
+            grp.create_dataset('W',data=self.W,shape=(self.NZ,self.NY,self.NX),dtype=np.float64)
             for i in range(self.NTH):
-                grp.create_dataset(f'TH{i+1}',self.TH[i,:,:,:],dtype=np.float64)
-
+                grp.create_dataset(f'TH{i+1}',data=self.TH[i,:,:,:],shape=(self.NZ,self.NY,self.NX),dtype=np.float64)
 
 if __name__ == "__main__":
-    set = setup('./2d_unforced')
-    S = start(set)
-    print(S.YF.shape)
-    print(S.U.shape)
-    print(S.YB.shape)
-    print(S.V.shape)
+    se = setup('./2d_unforced')
+    star = start(se)
+    star.write_start_file()
