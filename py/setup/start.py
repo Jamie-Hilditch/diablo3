@@ -44,7 +44,7 @@ class start():
     def write_start_file(self):
         filepath = os.path.join(self.directory,'start.h5')
         with h5py.File(filepath,'w') as f:
-            f.attrs.create('Resolution',[self.NZ,self.NY,self.NX],dtype=np.dtype('i'))
+            f.attrs.create('Resolution',[self.NX,self.NY,self.NZ],dtype=np.dtype('i'))
             grp = f.create_group('Timestep')
             grp.attrs.create('Time',self.Time,dtype=np.float64)
             grp.attrs.create('Save_Flow_Time',self.Save_Flow_Time,dtype=np.float64)
