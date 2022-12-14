@@ -37,6 +37,7 @@ module parameters
   ! timestepping
   real(rkind) :: wall_time_limit, time_limit
   real(rkind) :: delta_t
+  real(rkind) :: max_dt
   logical :: variable_dt
   real(rkind) :: CFL
   integer :: update_dt
@@ -99,6 +100,7 @@ contains
 
     nu = 1.d0 / Re
     Ro_inv = 1.d0 / Ro
+    max_dt = delta_t
 
   end
 

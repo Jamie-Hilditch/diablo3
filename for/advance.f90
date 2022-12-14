@@ -56,7 +56,7 @@ contains
     real(rkind) r_max ! Maximum fractional change in dt
 
     ! Set the initial dt to some arbitrary large number
-    dt = 1.d0
+    dt = max_dt
 
     ! Set the timestep based on viscosity and diffusivity
     dt = min(dt, 0.5d0 * min(dx(1), dz(1))**(2.d0 * beta) / nu)
