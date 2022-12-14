@@ -263,6 +263,10 @@ contains
       dTHdX(1) = 2.d0 / Lx * Ro_inv
       dTHdZ(1) = 0.d0
 
+    else 
+      dTHdX(1) = 0.d0
+      dTHdZ(1) = 0.d0
+
     end if
 
     w_BC_Ymax_c1_transient = w_BC_Ymax_c1 ! Mean of surface forcing (compensating for GS flow)
