@@ -1906,7 +1906,7 @@ contains
     end do
 
 
-    if (homogeneousX) then ! Infinite Front, or the likes -- Use constant th bins
+    if (.not. homogeneousX) then ! Infinite Front, or the likes -- Use constant th bins
 
       ! Bounds of theta
       thmin = -dTHdX(1) * 0.5*Lx * 1.1
