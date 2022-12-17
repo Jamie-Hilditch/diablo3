@@ -83,7 +83,9 @@ contains
 
     integer num_el
 
-    num_el = max(ceiling(0.5*(Nx+2)*(Nzp+2)*(Nyp+2)), &
+    !num_el = max(ceiling(0.5*(Nx+2)*(Nzp+2)*(Nyp+2)), &
+    !              (Nxp+1)*(Nz+2)*(Nyp+2))
+    num_el = max(int((Nx/2+1)*(Nzp+2)*(Nyp+2)), &
                   (Nxp+1)*(Nz+2)*(Nyp+2))
 
     data = fftw_alloc_complex(int(num_el, C_SIZE_T))
@@ -111,7 +113,9 @@ contains
 
     integer num_el
 
-    num_el = N_th*max(ceiling(0.5*(Nx+2)*(Nzp+2)*(Nyp+2)), &
+    !num_el = N_th*max(ceiling(0.5*(Nx+2)*(Nzp+2)*(Nyp+2)), &
+    !              (Nxp+1)*(Nz+2)*(Nyp+2))
+    num_el = N_th*max(int((Nx/2+1)*(Nzp+2)*(Nyp+2)), &
                   (Nxp+1)*(Nz+2)*(Nyp+2))
 
     data = fftw_alloc_complex(int(num_el, C_SIZE_T))
