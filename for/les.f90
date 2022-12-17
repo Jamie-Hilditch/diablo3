@@ -7,6 +7,13 @@ module les
   use phdf5
   implicit none
 
+  ! Enumerate the LES model types
+  integer, parameter :: LES_CONSTANT_SMAGORINSKY = 1
+  integer, parameter :: LES_DYNAMIC_SMAGORINSKY = 2
+  integer, parameter :: LES_SCALE_SIMILAR_SMAGORINSKY = 3
+  integer, parameter :: LES_AMD_ROZEMA = 4
+  integer, parameter :: LES_AMD_VERSTAPPEN = 5
+
 contains
 
   !----*|--.---------.---------.---------.---------.---------.---------.-|-------|
@@ -84,7 +91,7 @@ contains
     call apply_BC_les
     call apply_BC_th_les ! Pre-emptively for les_chan_th
 
-    if (les_model_type == 1) then
+    if (les_model_type == LES_CONSTANT_SMAGORINSKY) then
       ! Constant Smagorinsky model
 
       ! First, compute the rate of strain tensor S_ij
@@ -262,12 +269,14 @@ contains
 
 
 
-    else if ((les_model_type == 2) .or. (les_model_type == 3)) then
+    else if ((les_model_type == LES_DYNAMIC_SMAGORINSKY) .or. &
+      (les_model_type == LES_SCALE_SIMILAR_SMAGORINSKY)) then
       ! Here, use a dynamic smagorinsky model with or without scale similar part
 
-      stop 'Error: LES_MODEL_TYPE=2, 3 not supported yet in MPI'
+      stop 'Error: LES_MODEL_TYPE = 2 (dynamic Smagorinsky), &
+       3 (scale similar dynamic Smagorinsky) not supported yet in MPI'
 
-    else if (les_model_type == 4) then
+    else if (les_model_type == LES_AMD_ROZEMA) then
       ! Anisotropic Minimum Dissipation (AMD) Model (Rozema)
 
       ! First, compute the rate of strain tensor S_ij
@@ -558,7 +567,7 @@ contains
 
 
 
-    else if (les_model_type == 5) then
+    else if (les_model_type == LES_AMD_VERSTAPPEN) then
       ! Anisotropic Minimum Dissipation (AMD) Model (Verstappen)
 
       ! First, compute the rate of strain tensor S_ij
@@ -1125,7 +1134,7 @@ contains
 
 
 
-    if (les_model_type == 1 .or. les_model_type == 4) then
+    if (les_model_type == LES_CONSTANT_SMAGORINSKY .or. les_model_type == LES_AMD_ROZEMA) then
       ! Constant Smagorinsky model
       !  or  Anisotropic Minimum Dissipation (AMD) Model (Rozema)
 
@@ -1202,13 +1211,14 @@ contains
 
 
 
-    else if ((les_model_type == 2) .or. (les_model_type == 3)) then
+    else if ((les_model_type == LES_DYNAMIC_SMAGORINSKY) .or. &
+      (les_model_type == LES_SCALE_SIMILAR_SMAGORINSKY)) then
       ! Here, use a dynamic smagorinsky model with or without scale similar part
 
       stop 'Error: LES_MODEL_TYPE=2, 3 not supported yet in MPI'
 
 
-    else if (les_model_type == 5) then
+    else if (les_model_type == LES_AMD_VERSTAPPEN) then
       ! Anisotropic Minimum Dissipation (AMD) Model (Verstappen)
 
 
