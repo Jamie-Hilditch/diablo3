@@ -1185,7 +1185,7 @@ subroutine poisson_p_chan
         do i = 0, Nxp - 1 ! Nkx
           if ((rankZ /= 0) .or. (i /= 0) .or. (k /= 0)) then
             cs1(i, k, j) = cs1(i, k, j) + &
-                           (cth(i, k, j + 1, n) - cth(i, k, j - 1, n)) / (gyf(j + 1) - gyf(j - 1))
+                           Ri(n)*(cth(i, k, j + 1, n) - cth(i, k, j - 1, n)) / (gyf(j + 1) - gyf(j - 1))
           end if
         end do
       end do
