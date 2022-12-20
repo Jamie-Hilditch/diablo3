@@ -59,10 +59,10 @@ contains
     dt = max_dt
 
     ! Set the timestep based on viscosity and diffusivity
-    dt = min(dt, 0.5d0 * min(dx(1), dz(1))**(2.d0 * beta) / nu)
-    do n = 1, N_th
-      dt = min(dt, dt * nu / (nu / Pr(n)))
-    end do
+    ! dt = min(dt, 0.5d0 * min(dx(1), dz(1))**(2.d0 * beta) / nu)
+    ! do n = 1, N_th
+    !   dt = min(dt, dt * nu / (nu / Pr(n)))
+    ! end do
     ! Make sure that we capture the inertial period (for rotating flows)
     if (Ro_inv /= 0.d0) then
       dt = min(dt, 2.d0 * pi / abs((Ro_inv / delta)) / 20.d0)
