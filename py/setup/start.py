@@ -8,10 +8,16 @@ Jamie Hilditch December 2022
 """
 import os 
 
+import dask
+import dask.array as da
 import h5py
 import numpy as np
 
 from setup import setup
+
+@dask.delayed
+def _interpolate_to_fractional_grid(V):
+    return (V[:,:-1,:] + V[:,1:,:])/2
 
 class start():
 
@@ -22,10 +28,10 @@ class start():
         self.NY = setup.NY 
         self.NZ = setup.NZ
         self.NTH = setup.NTH
-        self.U = np.empty((setup.NZ,setup.NY,setup.NX))
-        self.V = np.empty((setup.NZ,setup.NY+1,setup.NX))
-        self.W = np.empty((setup.NZ,setup.NY,setup.NX))
-        self.TH = np.empty((self.NTH,setup.NZ,setup.NY,setup.NX))
+        self.U = da.empty((setup.NZ,setup.NY,setup.NX))
+        self.V = da.empty((setup.NZ,setup.NY+1,setup.NX))
+        self.W = da.empty((setup.NZ,setup.NY,setup.NX))
+        self.TH = da.empty((self.NTH,setup.NZ,setup.NY,setup.NX))
         self.x = setup.x_grid 
         self.G = setup.G 
         self.GF = setup.GF 
@@ -38,9 +44,6 @@ class start():
         self.Save_Movie_Time = setup.output['SAVE_MOVIE_DT']
         self.Time_Step = 0
 
-    def _compute_V_on_fractional_grid(self):
-        return (self.V[:,:-1,:] + self.V[:,1:,:])/2
-
     def write_start_file(self):
         filepath = os.path.join(self.directory,'start.h5')
         with h5py.File(filepath,'w') as f:
@@ -52,13 +55,20 @@ class start():
             grp.attrs.create('Save_Movie_Time',self.Save_Movie_Time,dtype=np.float64)
             grp.attrs.create('Time_Step',self.Time_Step,dtype=np.dtype('i'))
 
-            grp.create_dataset('U',data=self.U,shape=(self.NZ,self.NY,self.NX),dtype=np.float64)
-            grp.create_dataset('V',data=self._compute_V_on_fractional_grid(),shape=(self.NZ,self.NY,self.NX),dtype=np.float64)
-            grp.create_dataset('W',data=self.W,shape=(self.NZ,self.NY,self.NX),dtype=np.float64)
+            hdf5_variables = {
+                '/Timestep/U': self.U,
+                '/Timestep/V': _interpolate_to_fractional_grid(self.V),
+                '/Timestep/W': self.W
+            }
             for i in range(self.NTH):
-                grp.create_dataset(f'TH{i+1}',data=self.TH[i,:,:,:],shape=(self.NZ,self.NY,self.NX),dtype=np.float64)
+                hdf5_variables[f'/Timestep/TH{i+1}'] = self.TH[i,:,:,:]
 
+            da.to_hdf5(filepath,hdf5_variables)
+            
 if __name__ == "__main__":
+    from dask.distributed import Client
+    client = Client()
+    print(client)
     se = setup('./2d_unforced')
     star = start(se)
     star.write_start_file()

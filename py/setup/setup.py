@@ -8,11 +8,11 @@ Jamie Hilditch December 2022
 """
 
 import os
+import tomllib
 
 import h5py
 import numpy as np
 import re
-import toml
 
 def _parse_grid_def(filepath: str):
     """Parse the grid_def.all file"""
@@ -55,7 +55,7 @@ def _read_grid_h5(filepath: str):
 
 def _read_input(filepath: str):
     """read input.toml"""
-    return toml.load(filepath)
+    return tomllib.load(filepath)
 
 class setup:
 
