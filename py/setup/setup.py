@@ -55,7 +55,9 @@ def _read_grid_h5(filepath: str):
 
 def _read_input(filepath: str):
     """read input.toml"""
-    return tomllib.load(filepath)
+    with open(filepath,'rb') as fp:
+        inputs = tomllib.load(fp)
+    return inputs
 
 class setup:
 

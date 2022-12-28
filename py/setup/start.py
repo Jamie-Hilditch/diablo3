@@ -8,14 +8,12 @@ Jamie Hilditch December 2022
 """
 import os 
 
-import dask
 import dask.array as da
 import h5py
 import numpy as np
 
 from setup import setup
 
-@dask.delayed
 def _interpolate_to_fractional_grid(V):
     return (V[:,:-1,:] + V[:,1:,:])/2
 
@@ -55,20 +53,17 @@ class start():
             grp.attrs.create('Save_Movie_Time',self.Save_Movie_Time,dtype=np.float64)
             grp.attrs.create('Time_Step',self.Time_Step,dtype=np.dtype('i'))
 
-            hdf5_variables = {
-                '/Timestep/U': self.U,
-                '/Timestep/V': _interpolate_to_fractional_grid(self.V),
-                '/Timestep/W': self.W
-            }
-            for i in range(self.NTH):
-                hdf5_variables[f'/Timestep/TH{i+1}'] = self.TH[i,:,:,:]
+        hdf5_variables = {
+            '/Timestep/U': self.U,
+            '/Timestep/V': _interpolate_to_fractional_grid(self.V),
+            '/Timestep/W': self.W
+        }
+        for i in range(self.NTH):
+            hdf5_variables[f'/Timestep/TH{i+1}'] = self.TH[i,:,:,:]
 
-            da.to_hdf5(filepath,hdf5_variables)
+        da.to_hdf5(filepath,hdf5_variables)
             
 if __name__ == "__main__":
-    from dask.distributed import Client
-    client = Client()
-    print(client)
     se = setup('./2d_unforced')
     star = start(se)
     star.write_start_file()
