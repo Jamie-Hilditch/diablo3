@@ -1429,9 +1429,6 @@ contains
       call fft_xz_to_fourier(p, cp)
     end if
 
-    if (verbosity > 4 .and. rank == 0) &
-      write (*, '("Done reading")')
-
     ! Close the dataspace for the memory
     call h5sclose_f(memspace_id, Error)
 
@@ -1443,6 +1440,9 @@ contains
     call h5fclose_f(file_id, Error)
     call h5close_f(Error)
 
+    if (verbosity > 4 .and. rank == 0) &
+      write (*, '("Converting to Fourier space")')
+
     ! Convert to physical space
     call fft_xz_to_fourier(u1, cu1)
     call fft_xz_to_fourier(u2, cu2)
@@ -1452,6 +1452,9 @@ contains
         call fft_xz_to_fourier(th(:, :, :, ith), cth(:, :, :, ith))
       end if
     end do
+
+    if (verbosity > 4 .and. rank == 0) &
+      write (*, '("Done reading from HDF5")')
 
   end subroutine ReadHDF5
 
