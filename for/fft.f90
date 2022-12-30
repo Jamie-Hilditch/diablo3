@@ -63,8 +63,7 @@ module fft
   integer*8   fftw_x_to_p_plan, fftw_x_to_f_plan, &
               fftw_z_to_p_plan, fftw_z_to_f_plan
 
-  ! complex(C_DOUBLE_COMPLEX), pointer, contiguous :: temp_fft(:,:,:)
-  complex(C_DOUBLE_COMPLEX), pointer, contiguous :: temp_fft(0:Nx / 2, 0:Nzp + 1, 0:Nyp + 1)
+  complex(C_DOUBLE_COMPLEX), pointer, contiguous :: temp_fft(:,:,:)
 
 contains
 
