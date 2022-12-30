@@ -284,9 +284,12 @@ contains
     call mpi_barrier(mpi_comm_z, ierror)
 
 #else
-
+    if (verbosity > 4 .and. rank == 0) &
+      write (*, '("Before first MPI_ALLTOALL")')
     call mpi_alltoall(temp_fft(0, 0, 0), 1, xy2zy_1, &
                        vv(0, 0, 0), 1, xy2zy_2, mpi_comm_z, ierror)
+    if (verbosity > 4 .and. rank == 0) &
+      write (*, '("After first MPI_ALLTOALL")')
 
 #endif
 
