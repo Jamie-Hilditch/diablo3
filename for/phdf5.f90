@@ -1280,6 +1280,8 @@ contains
     call h5aread_f(aid, h5t_native_integer, tint, adims, Error)
     call h5aclose_f(aid, Error)
     ! Check that the resolution is of the same kind
+    if (verbosity > 4 .and. rank == 0) &
+      write (*, '("Reading resolution")')
     if ((tint(1) /= Nx) .or. &
         (tint(2) /= (Nyp - 1) * NprocY + 1) .or. &
         (tint(3) /= Nz)) then
@@ -1296,8 +1298,11 @@ contains
     ! -----------------------------
     ! Timey Wimey Stuff
     ! -----------------------------
-    call h5gopen_f(file_id, "/Timestep", gid, Error)
+    if (verbosity > 4 .and. rank == 0) &
+      write (*, '("Reading time and output parameters")')
 
+    call h5gopen_f(file_id, "/Timestep", gid, Error)
+    
     call h5aopen_by_name_f(gid, '.', 'Time', aid, Error)
     call h5aread_f(aid, h5t_native_double, time, adims, Error)
     call h5aclose_f(aid, Error)
@@ -1319,6 +1324,9 @@ contains
     call h5aclose_f(aid, Error)
 
     ! -----------------------------
+
+    if (verbosity > 4 .and. rank == 0) &
+      write (*, '("Reading variables ...")')
 
     ! Create property list for collective dataset write
     call h5pcreate_f(h5p_dataset_xfer_f, plist_id_w, Error)
@@ -1346,6 +1354,8 @@ contains
           ((ith > 3) .and. (.not. create_new_th(max(1, ith - 3))))) then
 
         ! Check to make sure that we should read in this scalar
+          if (verbosity > 4 .and. rank == 0) &
+            write (*, '("Reading ",A)') dname
 
         call h5dopen_f(gid, trim(dname), dset_id, Error)
         call h5dget_space_f(dset_id, filspace_id, Error)
@@ -1385,9 +1395,15 @@ contains
 
     end do
 
+    if (verbosity > 4 .and. rank == 0) &
+      write (*, '("Checking if pressure exists")')
+
     ! Decide whether to compute the pressure or to read
     call h5lexists_f(gid, 'P', read_pressure, Error)
     if (read_pressure) then
+      if (verbosity > 4 .and. rank == 0) &
+      write (*, '("Reading pressure")')
+
       dname = "P"
       call h5dopen_f(gid, trim(dname), dset_id, Error)
       call h5dget_space_f(dset_id, filspace_id, Error)
@@ -1424,6 +1440,9 @@ contains
     call h5fclose_f(file_id, Error)
     call h5close_f(Error)
 
+    if (verbosity > 4 .and. rank == 0) &
+      write (*, '("Converting to Fourier space")')
+
     ! Convert to physical space
     call fft_xz_to_fourier(u1, cu1)
     call fft_xz_to_fourier(u2, cu2)
@@ -1433,6 +1452,9 @@ contains
         call fft_xz_to_fourier(th(:, :, :, ith), cth(:, :, :, ith))
       end if
     end do
+
+    if (verbosity > 4 .and. rank == 0) &
+      write (*, '("Done reading from HDF5")')
 
   end subroutine ReadHDF5
 
