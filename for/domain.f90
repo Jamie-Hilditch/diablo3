@@ -187,7 +187,11 @@ contains
 
 
     bl(1:2) = (/1, 1/)
-    disp(1:2) = (/0, Nzp * (Nxp + 1) * 16/) ! Spacing between consecutive block starts in e.g. cu1
+    ! ************************ !
+    ! Is this spacing correct? !
+    ! ************************ !
+    ! disp(1:2) = (/0, Nzp * (Nxp + 1) * 16/) ! Spacing between consecutive block starts in e.g. cu1
+    disp(1:2) = (/0, Nzp * Nxp * 16/) ! Spacing between consecutive block starts in e.g. cu1
     types = (/type_cFF_full, mpi_ub/)
 
     call mpi_type_create_struct(2, bl, disp, types, xy2zy_2, ierror)
