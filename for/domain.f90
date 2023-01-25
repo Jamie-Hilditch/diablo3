@@ -187,6 +187,9 @@ contains
 
 
     bl(1:2) = (/1, 1/)
+    ! ************************ !
+    ! Is this spacing correct? !
+    ! ************************ !
     disp(1:2) = (/0, Nzp * (Nxp + 1) * 16/) ! Spacing between consecutive block starts in e.g. cu1
     types = (/type_cFF_full, mpi_ub/)
 
